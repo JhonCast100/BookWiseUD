@@ -42,45 +42,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setLoading(false);
   }, []);
 
-  const signIn = async (email: string, password: string) => {
-    try {
-      // 🟢 Send request to Spring Boot backend
-      const response = await axios.post('http://localhost:8080/auth/login', {
-        username: email, // 👈 importante: el backend espera "username"
-        password
-      });
-
-
-      // Backend returns a JWT token
-      const token = response.data.token;
-      console.log('✅ JWT received:', token);
-
-      // Save token in localStorage
-      localStorage.setItem('token', token);
-
-      // Temporary mock profile (until backend returns user data)
-      const mockProfile: UserProfile = {
-        id: '1',
-        email: email,
-        full_name: email.split('@')[0],
-        role: email.includes('librarian') ? 'librarian' : 'user',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      };
-
-      setUser({ id: '1', email });
-      setUserProfile(mockProfile);
-
-      // Save session data locally
-      localStorage.setItem('mock_user', JSON.stringify({ id: '1', email }));
-      localStorage.setItem('mock_profile', JSON.stringify(mockProfile));
-
-      return { error: null };
-    } catch (error: any) {
-      console.error('❌ Login error:', error);
-      return { error: new Error('Login failed') };
-    }
-  };
+ 
 
 
   const signUp = async (email: string, password: string, fullName: string, role: 'librarian' | 'user') => {
