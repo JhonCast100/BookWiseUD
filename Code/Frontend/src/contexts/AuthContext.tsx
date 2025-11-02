@@ -1,5 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { UserProfile } from '../types';
+import axios from 'axios';
+
 
 interface User {
   id: string;
@@ -26,7 +28,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const savedUser = localStorage.getItem('mock_user');
     const savedProfile = localStorage.getItem('mock_profile');
-    
+
     if (savedUser && savedProfile) {
       try {
         setUser(JSON.parse(savedUser));
@@ -42,70 +44,91 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     try {
-      // Mock authentication - TODO: Replace with Java backend
-      if (email && password) {
-        const mockUser: User = {
-          id: '1',
-          email: email,
-        };
-        
-        const mockProfile: UserProfile = {
-          id: '1',
-          email: email,
-          full_name: email.split('@')[0],
-          role: email.includes('librarian') ? 'librarian' : 'user',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        };
+      // 🟢 Send request to Spring Boot backend
+      const response = await axios.post('http://localhost:8080/auth/login', {
+        username: email, // 👈 importante: el backend espera "username"
+        password
+      });
 
-        setUser(mockUser);
-        setUserProfile(mockProfile);
-        
-        // Guardar en localStorage para persistencia
-        localStorage.setItem('mock_user', JSON.stringify(mockUser));
-        localStorage.setItem('mock_profile', JSON.stringify(mockProfile));
-        
-        return { error: null };
-      }
-      
-      return { error: new Error('Email and password required') };
-    } catch (error) {
-      return { error: error as Error };
+
+      // Backend returns a JWT token
+      const token = response.data.token;
+      console.log('✅ JWT received:', token);
+
+      // Save token in localStorage
+      localStorage.setItem('token', token);
+
+      // Temporary mock profile (until backend returns user data)
+      const mockProfile: UserProfile = {
+        id: '1',
+        email: email,
+        full_name: email.split('@')[0],
+        role: email.includes('librarian') ? 'librarian' : 'user',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+
+      setUser({ id: '1', email });
+      setUserProfile(mockProfile);
+
+      // Save session data locally
+      localStorage.setItem('mock_user', JSON.stringify({ id: '1', email }));
+      localStorage.setItem('mock_profile', JSON.stringify(mockProfile));
+
+      return { error: null };
+    } catch (error: any) {
+      console.error('❌ Login error:', error);
+      return { error: new Error('Login failed') };
     }
   };
+
 
   const signUp = async (email: string, password: string, fullName: string, role: 'librarian' | 'user') => {
     try {
-      // Mock sign up - TODO: Replace with Java backend
-      if (email && password && fullName) {
-        const mockUser: User = {
-          id: Date.now().toString(),
-          email: email,
-        };
-        
-        const mockProfile: UserProfile = {
-          id: mockUser.id,
-          email: email,
-          full_name: fullName,
-          role: role,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        };
+      // 🟢 Send registration data to backend
+      const response = await axios.post('http://localhost:8080/auth/register', {
+        email,
+        password,
+        fullName,
+        role
+      });
 
-        setUser(mockUser);
-        setUserProfile(mockProfile);
-        
-        localStorage.setItem('mock_user', JSON.stringify(mockUser));
-        localStorage.setItem('mock_profile', JSON.stringify(mockProfile));
-        
-        return { error: null };
-      }
-      
-      return { error: new Error('All fields required') };
-    } catch (error) {
-      return { error: error as Error };
+      // Receive JWT token from backend
+      const token = response.data.token;
+      console.log('✅ Token received on registration:', token);
+
+      // Save token in browser
+      localStorage.setItem('token', token);
+
+      // Create local user and profile (for compatibility)
+      const mockUser: User = {
+        id: Date.now().toString(),
+        email: email,
+      };
+
+      const mockProfile: UserProfile = {
+        id: mockUser.id,
+        email,
+        full_name: fullName,
+        role,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+
+      setUser(mockUser);
+      setUserProfile(mockProfile);
+
+      // Save in localStorage for session persistence
+      localStorage.setItem('mock_user', JSON.stringify(mockUser));
+      localStorage.setItem('mock_profile', JSON.stringify(mockProfile));
+
+      return { error: null };
+    } catch (error: any) {
+      console.error('❌ Registration error:', error);
+      return { error: new Error('Registration failed') };
     }
   };
+
 
   const signOut = async () => {
     setUser(null);
