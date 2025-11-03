@@ -1,4 +1,3 @@
-// src/components/user/BookCatalog.tsx
 import { useState, useEffect } from 'react';
 import { apiService, ApiBook } from '../../services/api';
 import { BookOpen, Search, Calendar } from 'lucide-react';

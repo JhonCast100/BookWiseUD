@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://127.0.0.1:8000';
+import { apiClient } from './axiosConfig';
 
 export interface ApiUser {
   user_id?: number;
@@ -22,143 +22,124 @@ export interface ApiBook {
 export interface ApiLoan {
   loan_id?: number;
   book_id: number;
-  user_id: number;
+  user_id?: number;  // Ya no se envía desde frontend, se toma del token
   loan_date?: string;
   return_date?: string;
   status?: string;
 }
 
 class ApiService {
-  private async request<T>(
-    endpoint: string,
-    options?: RequestInit
-  ): Promise<T> {
-    const url = `${API_BASE_URL}${endpoint}`;
-
-    const config: RequestInit = {
-      ...options,
-      headers: {
-        'Content-Type': 'application/json',
-        ...options?.headers,
-      },
-    };
-
-    try {
-      const response = await fetch(url, config);
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
-      }
-
-      // Si la respuesta es 204 No Content, retornar un objeto vacío
-      if (response.status === 204) {
-        return {} as T;
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error(`API request failed: ${endpoint}`, error);
-      throw error;
-    }
-  }
-
-  // User endpoints
+  // ==================== USER ENDPOINTS ====================
   async getUsers(): Promise<ApiUser[]> {
-    return this.request<ApiUser[]>('/users/');
+    const response = await apiClient.get('/users/');
+    return response.data;
   }
 
   async getUser(userId: number): Promise<ApiUser> {
-    return this.request<ApiUser>(`/users/${userId}`);
+    const response = await apiClient.get(`/users/${userId}`);
+    return response.data;
   }
 
   async createUser(user: ApiUser): Promise<ApiUser> {
-    return this.request<ApiUser>('/users/', {
-      method: 'POST',
-      body: JSON.stringify(user),
-    });
+    const response = await apiClient.post('/users/', user);
+    return response.data;
   }
 
   async updateUser(userId: number, user: ApiUser): Promise<ApiUser> {
-    return this.request<ApiUser>(`/users/${userId}`, {
-      method: 'PUT',
-      body: JSON.stringify(user),
-    });
+    const response = await apiClient.put(`/users/${userId}`, user);
+    return response.data;
   }
 
   async deleteUser(userId: number): Promise<{ message: string }> {
-    return this.request<{ message: string }>(`/users/${userId}`, {
-      method: 'DELETE',
-    });
+    const response = await apiClient.delete(`/users/${userId}`);
+    return response.data;
   }
 
-  // Book endpoints
+  // ==================== BOOK ENDPOINTS ====================
   async getBooks(): Promise<ApiBook[]> {
-    return this.request<ApiBook[]>('/books/');
+    const response = await apiClient.get('/books/');
+    return response.data;
   }
 
   async getBook(bookId: number): Promise<ApiBook> {
-    return this.request<ApiBook>(`/books/${bookId}`);
+    const response = await apiClient.get(`/books/${bookId}`);
+    return response.data;
   }
 
   async createBook(book: ApiBook): Promise<ApiBook> {
-    return this.request<ApiBook>('/books/', {
-      method: 'POST',
-      body: JSON.stringify(book),
-    });
+    const response = await apiClient.post('/books/', book);
+    return response.data;
   }
 
   async updateBook(bookId: number, book: ApiBook): Promise<ApiBook> {
-    return this.request<ApiBook>(`/books/${bookId}`, {
-      method: 'PUT',
-      body: JSON.stringify(book),
-    });
+    const response = await apiClient.put(`/books/${bookId}`, book);
+    return response.data;
   }
 
   async deleteBook(bookId: number): Promise<{ message: string }> {
-    return this.request<{ message: string }>(`/books/${bookId}`, {
-      method: 'DELETE',
-    });
+    const response = await apiClient.delete(`/books/${bookId}`);
+    return response.data;
   }
 
   async getAvailableBooks(): Promise<ApiBook[]> {
-    return this.request<ApiBook[]>('/books/available');
+    const response = await apiClient.get('/books/available');
+    return response.data;
   }
 
   async searchBooks(search: string): Promise<ApiBook[]> {
-    return this.request<ApiBook[]>(`/books/search?search=${encodeURIComponent(search)}`);
+    const response = await apiClient.get(`/books/search?search=${encodeURIComponent(search)}`);
+    return response.data;
   }
 
-  // Loan endpoints
-  async getLoans(): Promise<ApiLoan[]> {
-    return this.request<ApiLoan[]>('/loans/');
+  // ==================== LOAN ENDPOINTS ====================
+  
+  // Solo para bibliotecarios: ver todos los préstamos
+  async getAllLoans(): Promise<ApiLoan[]> {
+    const response = await apiClient.get('/loans/');
+    return response.data;
+  }
+
+  // Para usuarios: ver sus propios préstamos
+  async getMyLoans(): Promise<ApiLoan[]> {
+    const response = await apiClient.get('/loans/me');
+    return response.data;
   }
 
   async getActiveLoans(): Promise<ApiLoan[]> {
-    return this.request<ApiLoan[]>('/loans/active');
+    const response = await apiClient.get('/loans/active');
+    return response.data;
   }
 
   async getLoan(loanId: number): Promise<ApiLoan> {
-    return this.request<ApiLoan>(`/loans/${loanId}`);
+    const response = await apiClient.get(`/loans/${loanId}`);
+    return response.data;
   }
 
-  async createLoan(loan: ApiLoan): Promise<ApiLoan> {
-    return this.request<ApiLoan>('/loans/', {
-      method: 'POST',
-      body: JSON.stringify(loan),
-    });
+  // Crear préstamo (usuario solicita, se asocia automáticamente con su user_id)
+  async createLoan(loan: { book_id: number; loan_date?: string }): Promise<ApiLoan> {
+    const response = await apiClient.post('/loans/', loan);
+    return response.data;
   }
 
   async returnLoan(loanId: number): Promise<ApiLoan> {
-    return this.request<ApiLoan>(`/loans/return/${loanId}`, {
-      method: 'PUT',
-    });
+    const response = await apiClient.put(`/loans/return/${loanId}`);
+    return response.data;
   }
 
   async deleteLoan(loanId: number): Promise<{ message: string }> {
-    return this.request<{ message: string }>(`/loans/${loanId}`, {
-      method: 'DELETE',
-    });
+    const response = await apiClient.delete(`/loans/${loanId}`);
+    return response.data;
+  }
+
+  // ==================== DASHBOARD STATS ====================
+  async getDashboardStats(): Promise<{
+    total_books: number;
+    total_users: number;
+    active_loans: number;
+    available_books: number;
+  }> {
+    const response = await apiClient.get('/stats/dashboard');
+    return response.data;
   }
 }
 
