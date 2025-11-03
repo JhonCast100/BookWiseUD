@@ -37,7 +37,7 @@ class UserBase(BaseModel):
     email: str
     phone: Optional[str]
     status: Optional[str] = "active"
-    auth_id: Optional[int] = None  # Agregado para compatibilidad
+    auth_id: Optional[int] = None
 
 class UserCreate(UserBase):
     pass
@@ -48,17 +48,21 @@ class User(UserBase):
         orm_mode = True
 
 
+# ✅ ACTUALIZADO: user_id ahora es opcional porque se toma del JWT
 class LoanBase(BaseModel):
     book_id: int
-    user_id: int
-    loan_date: Optional[date]
-    return_date: Optional[date]
+    user_id: Optional[int] = None  # Opcional - se obtiene del token
+    loan_date: Optional[date] = None
+    return_date: Optional[date] = None
     status: Optional[str] = "active"
 
-class LoanCreate(LoanBase):
-    pass
+# ✅ ACTUALIZADO: LoanCreate solo necesita book_id
+class LoanCreate(BaseModel):
+    book_id: int
+    loan_date: Optional[date] = None
 
 class Loan(LoanBase):
     loan_id: int
+    user_id: int  # En la respuesta siempre debe estar
     class Config:
         orm_mode = True

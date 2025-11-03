@@ -1,16 +1,25 @@
 import { useState, useEffect } from 'react';
 import { ViewType } from './types';
-// import { initializeSampleData } from './utils/storage'; // Comentado temporalmente
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import Dashboard from './components/librarian/Dashboard';
+
+// Componentes de Layout
+import Home from './components/layout/Home';
+import Login from './components/layout/Login';
+import Header from '..//src/components/layout/Header';
+import Footer from '..//src/components/layout/Footer';
+
+// Componentes de Librarian
+import LibrarianDashboard from './components/librarian/Dashboard';
 import BookManagement from './components/librarian/BookManagement';
 import UserManagement from './components/librarian/UserManagement';
 import LoanManagement from './components/librarian/LoanManagement';
-import Home from './components/layout/Home';
-import Login from './components/layout/Login';
-import Header from './components/Header';
-import Footer from './components/Footer';
+
+// Componentes de User
+import BookCatalog from './components/user/BookCatalog';
+import MyLoans from './components/user/MyLoans';
 import UserProfile from './components/user/UserProfile';
+
+// Icons
 import { LayoutDashboard, BookOpen, Users, BookMarked, Library } from 'lucide-react';
 
 function AppContent() {
@@ -18,11 +27,9 @@ function AppContent() {
   const [currentView, setCurrentView] = useState<ViewType>('home');
   const [showProfile, setShowProfile] = useState(false);
 
-  // Comentado temporalmente - ya no necesitamos datos de muestra
-  // useEffect(() => {
-  //   initializeSampleData();
-  // }, []);
+  const isLibrarian = userProfile?.role === 'librarian';
 
+  // Navegación dinámica según el rol del usuario
   const getNavigation = () => {
     if (!user) {
       return [
@@ -30,7 +37,7 @@ function AppContent() {
       ];
     }
 
-    if (userProfile?.role === 'librarian') {
+    if (isLibrarian) {
       return [
         { id: 'dashboard' as ViewType, label: 'Dashboard', icon: LayoutDashboard },
         { id: 'books' as ViewType, label: 'Books', icon: BookOpen },
@@ -38,49 +45,66 @@ function AppContent() {
         { id: 'loans' as ViewType, label: 'Loans', icon: BookMarked },
       ];
     } else {
+      // Usuario normal
       return [
-        { id: 'books' as ViewType, label: 'Books', icon: BookOpen },
-        { id: 'loans' as ViewType, label: 'Loans', icon: BookMarked },
+        { id: 'dashboard' as ViewType, label: 'Dashboard', icon: LayoutDashboard },
+        { id: 'books' as ViewType, label: 'Catalog', icon: BookOpen },
+        { id: 'loans' as ViewType, label: 'My Loans', icon: BookMarked },
       ];
     }
   };
 
   const navigation = getNavigation();
 
+  // Renderiza la vista correcta según el rol y la vista actual
   const renderView = () => {
-    if (!user && currentView !== 'home') {
-      return <Login />;
+    // Si no hay usuario autenticado, mostrar Home o Login
+    if (!user) {
+      return currentView === 'home' ? <Home /> : <Login />;
     }
 
+    // Usuario autenticado - renderizar según rol
     switch (currentView) {
       case 'home':
-        return user ? (userProfile?.role === 'librarian' ? <Dashboard /> : <BookManagement />) : <Home />;
+        // Redirigir a dashboard si está autenticado
+        return isLibrarian ? <LibrarianDashboard /> : <BookCatalog />;
+
       case 'dashboard':
-        return userProfile?.role === 'librarian' ? <Dashboard /> : <Home />;
+        // Dashboard diferente según el rol
+        return isLibrarian ? <LibrarianDashboard /> : <BookCatalog />;
+
       case 'books':
-        return <BookManagement />;
+        // Libros: Gestión completa para librarian, catálogo para users
+        return isLibrarian ? <BookManagement /> : <BookCatalog />;
+
       case 'users':
-        return userProfile?.role === 'librarian' ? <UserManagement /> : <Home />;
+        // Solo librarians pueden ver usuarios
+        return isLibrarian ? <UserManagement /> : <BookCatalog />;
+
       case 'loans':
-        return <LoanManagement />;
+        // Préstamos: Gestión completa para librarian, solo ver los propios para users
+        return isLibrarian ? <LoanManagement /> : <MyLoans />;
+
       default:
-        return <Home />;
+        return isLibrarian ? <LibrarianDashboard /> : <BookCatalog />;
     }
   };
 
+  // Redirigir a la vista apropiada cuando el usuario inicia sesión
   useEffect(() => {
     if (user && (currentView === 'home' || !currentView)) {
-      if (userProfile?.role === 'librarian') {
+      if (isLibrarian) {
         setCurrentView('dashboard');
       } else {
-        setCurrentView('books');
+        setCurrentView('books'); // Usuarios van directo al catálogo
       }
     } else if (!user && currentView !== 'home') {
       setCurrentView('home');
     }
-  }, [user, userProfile]);
+  }, [user, userProfile, isLibrarian]);
 
   const handleLogout = async () => {
+    console.log('👋 Logging out...');
     await signOut();
     setCurrentView('home');
     setShowProfile(false);
@@ -90,6 +114,7 @@ function AppContent() {
     setShowProfile(true);
   };
 
+  // Loading state
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-slate-100 to-slate-200">
@@ -119,6 +144,7 @@ function AppContent() {
 
       <Footer />
 
+      {/* Modal de perfil de usuario */}
       {showProfile && <UserProfile onClose={() => setShowProfile(false)} />}
     </div>
   );
