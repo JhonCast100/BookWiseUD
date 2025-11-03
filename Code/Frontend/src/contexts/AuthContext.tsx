@@ -46,7 +46,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       // 🟢 Send request to Spring Boot backend
       const response = await axios.post('http://localhost:8080/auth/login', {
-        username: email, // 👈 importante: el backend espera "username"
+        username: email, 
         password
       });
 

@@ -38,7 +38,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV="C:\Users\PC\Downloads\Nueva carpeta (4)\project\Backend\venv"
+VIRTUAL_ENV="C:\Users\PC\Downloads\project_final_seminnar\BookWiseUD\Code\Backend\venv"
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"

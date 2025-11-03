@@ -2,15 +2,15 @@ import { useState, useEffect } from 'react';
 import { ViewType } from './types';
 // import { initializeSampleData } from './utils/storage'; // Comentado temporalmente
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import Dashboard from './components/Dashboard';
-import BookManagement from './components/BookManagement';
-import UserManagement from './components/UserManagement';
-import LoanManagement from './components/LoanManagement';
-import Home from './components/Home';
-import Login from './components/Login';
+import Dashboard from './components/librarian/Dashboard';
+import BookManagement from './components/librarian/BookManagement';
+import UserManagement from './components/librarian/UserManagement';
+import LoanManagement from './components/librarian/LoanManagement';
+import Home from './components/layout/Home';
+import Login from './components/layout/Login';
 import Header from './components/Header';
 import Footer from './components/Footer';
-import UserProfile from './components/UserProfile';
+import UserProfile from './components/user/UserProfile';
 import { LayoutDashboard, BookOpen, Users, BookMarked, Library } from 'lucide-react';
 
 function AppContent() {
