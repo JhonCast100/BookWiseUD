@@ -8,9 +8,13 @@ from app.models import User
 
 security = HTTPBearer()
 
-# Estas variables deben coincidir con las de Spring Boot
-SECRET_KEY = os.getenv("JWT_SECRET_KEY", "your-secret-key-here")
-ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
+# Clave secreta de Spring Boot (codificada en Base64)
+SECRET_KEY = "MTkxNTYyMDIzMTE4NTUxNDc5MTQ1NTE4OTE0NzE5NTEzOTE0MTE4"
+ALGORITHM = "HS256"
+
+# Decodificar la clave desde Base64
+import base64
+DECODED_KEY = base64.b64decode(SECRET_KEY)
 
 
 def decode_jwt(token: str) -> dict:
@@ -18,12 +22,23 @@ def decode_jwt(token: str) -> dict:
     Decodifica y valida el token JWT emitido por Spring Boot
     """
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        # Añadir verificación de token vacío o None
+        if not token:
+            raise HTTPException(status_code=401, detail="No token provided")
+        
+        print(f"Decoding token: {token[:20]}...")  # Imprime los primeros 20 caracteres del token
+        payload = jwt.decode(token, DECODED_KEY, algorithms=[ALGORITHM])
+        print(f"Decoded payload: {payload}")  # Imprime el contenido del token
         return payload  # Contiene: auth_id, email, roles, exp, etc.
-    except jwt.ExpiredSignatureError:
+    except jwt.ExpiredSignatureError as e:
+        print(f"Token expired: {str(e)}")
         raise HTTPException(status_code=401, detail="Token has expired")
-    except jwt.InvalidTokenError:
+    except jwt.InvalidTokenError as e:
+        print(f"Invalid token: {str(e)}")
         raise HTTPException(status_code=401, detail="Invalid token")
+    except Exception as e:
+        print(f"Unexpected error decoding token: {str(e)}")
+        raise HTTPException(status_code=401, detail=f"Token error: {str(e)}")
 
 
 def get_current_user(
@@ -39,20 +54,40 @@ def get_current_user(
     
     # Decodificar el token
     payload = decode_jwt(token)
+    print("Token payload:", payload)  # Para depuración
     
-    # Obtener el auth_id (ID del sistema de autenticación de Spring Boot)
-    auth_id = payload.get("auth_id")
-    if auth_id is None:
-        raise HTTPException(status_code=400, detail="Invalid token: missing auth_id")
+    # Obtener el correo electrónico del subject del token
+    email = payload.get("sub")  # Spring Boot usa 'sub' para el email
+    if email is None:
+        raise HTTPException(status_code=400, detail="Invalid token: missing subject (email)")
     
-    # Buscar el usuario en la base de datos local usando auth_id
-    user = db.query(User).filter(User.auth_id == auth_id).first()
+    # Buscar el usuario por email
+    user = db.query(User).filter(User.email == email).first()
     
+    # Si el usuario no existe, lo creamos
     if not user:
-        raise HTTPException(
-            status_code=404, 
-            detail="User not found. Please contact administrator."
+        print(f"Creating new user with email: {email}")
+        
+        # Crear el usuario
+        user = User(
+            email=email,
+            full_name=email.split('@')[0],  # Usamos parte del email como nombre temporal
+            status="active",
+            # No necesitamos auth_id ya que usaremos email para la relación
         )
+        db.add(user)
+        
+        try:
+            db.commit()
+            db.refresh(user)
+            print(f"User created successfully with ID: {user.user_id}")
+        except Exception as e:
+            print(f"Error creating user: {str(e)}")
+            db.rollback()
+            raise HTTPException(
+                status_code=500,
+                detail="Error creating user in database"
+            )
     
     return user
 
