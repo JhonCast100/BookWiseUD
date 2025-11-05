@@ -68,12 +68,20 @@ def get_current_user(
     if not user:
         print(f"Creating new user with email: {email}")
         
+        # Obtener el auth_id del token
+        auth_id = payload.get("auth_id")
+        if not auth_id:
+            raise HTTPException(
+                status_code=400, 
+                detail="Invalid token: missing auth_id"
+            )
+            
         # Crear el usuario
         user = User(
             email=email,
             full_name=email.split('@')[0],  # Usamos parte del email como nombre temporal
             status="active",
-            # No necesitamos auth_id ya que usaremos email para la relación
+            auth_id=auth_id  # ✅ Asignamos el auth_id del token
         )
         db.add(user)
         
@@ -103,17 +111,25 @@ def get_current_librarian(
     token = credentials.credentials
     payload = decode_jwt(token)
     
-    # Verificar roles desde el token
-    roles = payload.get("roles", [])
-    if "ROLE_LIBRARIAN" not in roles:
+    # Verificar authorities desde el token
+    authorities = payload.get("authorities", [])
+    
+    # Verificar si el usuario es admin
+    is_admin = "ADMIN" in authorities
+    
+    if not is_admin:
         raise HTTPException(
             status_code=403, 
-            detail="Access denied. Librarian role required."
+            detail="Access denied. Admin role required."
         )
     
-    # También obtener el usuario desde la DB
-    auth_id = payload.get("auth_id")
-    user = db.query(User).filter(User.auth_id == auth_id).first()
+    # Obtener el correo electrónico del token
+    email = payload.get("sub")
+    if email is None:
+        raise HTTPException(status_code=400, detail="Invalid token: missing subject (email)")
+    
+    # Obtener el usuario por email
+    user = db.query(User).filter(User.email == email).first()
     
     if not user:
         raise HTTPException(status_code=404, detail="User not found")

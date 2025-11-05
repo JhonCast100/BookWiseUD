@@ -1,4 +1,4 @@
-// src/components/Dashboard.tsx
+// src/components/librarian/Dashboard.tsx
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { apiService } from '../../services/api';
@@ -31,28 +31,40 @@ export default function Dashboard() {
       setLoading(true);
       setError(null);
 
-      // Si el backend tiene un endpoint /stats/dashboard, úsalo:
-      // const data = await apiService.getDashboardStats();
-      // setStats(data);
+      const isLibrarian = userProfile?.role === 'librarian';
 
-      // Si no, calculamos las estadísticas manualmente:
-      const [books, users, loans] = await Promise.all([
-        apiService.getBooks(),
-        apiService.getUsers(),
-        userProfile?.role === 'librarian' 
-          ? apiService.getAllLoans() 
-          : apiService.getMyLoans()
-      ]);
+      // Cargar datos según el rol
+      const books = await apiService.getBooks();
+      
+      let users = [];
+      let loans = [];
+      
+      try {
+        if (isLibrarian) {
+          // Solo librarians pueden ver todos los usuarios y préstamos
+          users = await apiService.getUsers();
+          loans = await apiService.getAllLoans();
+        } else {
+          // Usuarios normales solo ven sus préstamos
+          loans = await apiService.getMyLoans();
+        }
+      } catch (err: any) {
+        console.warn('Error loading users/loans:', err);
+        // Si hay error 403, el usuario no tiene permisos
+        if (err.response?.status === 403) {
+          console.log('User does not have admin permissions');
+        }
+      }
 
       setStats({
         total_books: books.length,
         total_users: users.length,
-        active_loans: loans.filter(l => l.status === 'active').length,
-        available_books: books.filter(b => b.status === 'available').length
+        active_loans: loans.filter((l: any) => l.status === 'active').length,
+        available_books: books.filter((b: any) => b.status === 'available').length
       });
-    } catch (err) {
-      setError('Error loading dashboard data');
-      console.error(err);
+    } catch (err: any) {
+      console.error('Dashboard error:', err);
+      setError(err.response?.data?.detail || 'Error loading dashboard data');
     } finally {
       setLoading(false);
     }
@@ -116,8 +128,16 @@ export default function Dashboard() {
 
   if (error) {
     return (
-      <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-        {error}
+      <div className="space-y-4">
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+          {error}
+        </div>
+        <button
+          onClick={loadStats}
+          className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-lg"
+        >
+          Retry
+        </button>
       </div>
     );
   }
@@ -143,7 +163,7 @@ export default function Dashboard() {
           >
             <div className="flex items-center justify-between mb-4">
               <div className={`${stat.bgColor} p-3 rounded-lg`}>
-                <stat.icon className={`text-${stat.color.replace('bg-', '')}`} size={24} />
+                <stat.icon className="text-emerald-600" size={24} />
               </div>
             </div>
             <p className="text-slate-600 text-sm mb-1">{stat.title}</p>

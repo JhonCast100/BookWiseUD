@@ -12,5 +12,8 @@ import lombok.NoArgsConstructor;
 public class AuthResponse {
     private String token;
     private String role;
+<<<<<<< HEAD
     private String email;
+=======
+>>>>>>> recuperar-avance
 }

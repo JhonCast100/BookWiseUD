@@ -45,6 +45,7 @@ def update_book(db: Session, book_id: int, book_update: schemas.BookCreate):
 def delete_book(db: Session, book_id: int):
     book = get_book_by_id(db, book_id)
     if book:
-        db.delete(book)
+        book.status = "inactive"
         db.commit()
+        db.refresh(book)
     return book

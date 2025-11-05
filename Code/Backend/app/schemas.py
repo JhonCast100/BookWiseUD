@@ -63,6 +63,6 @@ class LoanCreate(BaseModel):
 
 class Loan(LoanBase):
     loan_id: int
-    user_id: int  # En la respuesta siempre debe estar
+    user_id: int  
     class Config:
         orm_mode = True

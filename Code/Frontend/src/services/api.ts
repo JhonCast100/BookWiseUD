@@ -1,5 +1,11 @@
 import { apiClient } from './axiosConfig';
 
+export interface ApiCategory {
+  category_id: number;
+  name: string;
+  description?: string;
+}
+
 export interface ApiUser {
   user_id?: number;
   full_name: string;
@@ -22,13 +28,19 @@ export interface ApiBook {
 export interface ApiLoan {
   loan_id?: number;
   book_id: number;
-  user_id?: number;  // Ya no se envía desde frontend, se toma del token
+  user_id?: number;
   loan_date?: string;
   return_date?: string;
   status?: string;
 }
 
+
 class ApiService {
+  // ==================== CATEGORY ENDPOINTS ====================
+  async getCategories(): Promise<ApiCategory[]> {
+    const response = await apiClient.get('/categories/');
+    return response.data;
+  }
   // ==================== USER ENDPOINTS ====================
   async getUsers(): Promise<ApiUser[]> {
     const response = await apiClient.get('/users/');
