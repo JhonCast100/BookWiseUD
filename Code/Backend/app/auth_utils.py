@@ -104,19 +104,38 @@ def get_current_librarian(
     payload = decode_jwt(token)
     
     # Verificar roles desde el token
-    role = payload.get("role")
-    if role != "ADMIN":
+    roles = payload.get("role", [])  # Spring Boot usa "role" en singular
+    if roles != "ADMIN":  # Spring Boot usa "ADMIN" para bibliotecarios
         raise HTTPException(
             status_code=403, 
-            detail="Access denied. Admin role required."
+            detail="Access denied. Administrator role required."
         )
     
-    # También obtener el usuario desde la DB
-    auth_id = payload.get("auth_id")
-    user = db.query(User).filter(User.auth_id == auth_id).first()
+    # Obtener el email del token
+    email = payload.get("sub")  # Spring Boot usa 'sub' para el email
+    if email is None:
+        raise HTTPException(status_code=400, detail="Invalid token: missing subject (email)")
+    
+    # Buscar el usuario por email
+    user = db.query(User).filter(User.email == email).first()
     
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        # Si el usuario no existe en la base de datos de FastAPI, lo creamos
+        user = User(
+            email=email,
+            full_name=email.split('@')[0],  # Usamos parte del email como nombre temporal
+            status="active"
+        )
+        db.add(user)
+        try:
+            db.commit()
+            db.refresh(user)
+        except Exception as e:
+            db.rollback()
+            raise HTTPException(
+                status_code=500,
+                detail="Error creating user in database"
+            )
     
     return user
 
