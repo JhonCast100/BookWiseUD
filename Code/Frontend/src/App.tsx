@@ -47,7 +47,6 @@ function AppContent() {
     } else {
       // Usuario normal
       return [
-        { id: 'dashboard' as ViewType, label: 'Dashboard', icon: LayoutDashboard },
         { id: 'books' as ViewType, label: 'Catalog', icon: BookOpen },
         { id: 'loans' as ViewType, label: 'My Loans', icon: BookMarked },
       ];
