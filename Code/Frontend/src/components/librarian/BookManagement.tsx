@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { apiService, ApiBook } from '../../services/api';
+import { apiService, ApiBook, ApiCategory } from '../../services/api';
 import { BookOpen, Plus, Search, CreditCard as Edit2, Trash2, X } from 'lucide-react';
 
 export default function BookManagement() {
   const [books, setBooks] = useState<ApiBook[]>([]);
+  const [categories, setCategories] = useState<ApiCategory[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBook, setEditingBook] = useState<ApiBook | null>(null);
@@ -52,7 +53,8 @@ export default function BookManagement() {
         author: formData.author || '',
         isbn: formData.isbn || '',
         publication_year: formData.publication_year,
-        status: formData.status || 'available'
+        status: formData.status || 'available',
+        category_id: formData.category_id
       };
 
       if (editingBook && editingBook.book_id) {
@@ -87,7 +89,13 @@ export default function BookManagement() {
     }
   };
 
-  const openModal = (book?: ApiBook) => {
+  const openModal = async (book?: ApiBook) => {
+    try {
+      const cats = await apiService.getCategories();
+      setCategories(cats);
+    } catch (err) {
+      setCategories([]);
+    }
     if (book) {
       setEditingBook(book);
       setFormData(book);
@@ -98,11 +106,12 @@ export default function BookManagement() {
         author: '',
         isbn: '',
         publication_year: new Date().getFullYear(),
-        status: 'available'
+        status: 'available',
+        category_id: categories.length > 0 ? categories[0].category_id : undefined
       });
     }
     setIsModalOpen(true);
-  };
+  }
 
   const closeModal = () => {
     setIsModalOpen(false);
@@ -253,6 +262,20 @@ export default function BookManagement() {
                   />
                 </div>
 
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Category *</label>
+                  <select
+                    required
+                    value={formData.category_id}
+                    onChange={(e) => setFormData({ ...formData, category_id: Number(e.target.value) })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  >
+                    <option value="">Select category</option>
+                    {categories.map(cat => (
+                      <option key={cat.category_id} value={cat.category_id}>{cat.name}</option>
+                    ))}
+                  </select>
+                </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">Status *</label>
                   <select

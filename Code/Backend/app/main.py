@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import engine
 from app import models
-from app.routers import users, books, loans, stats  # ✅ Agregar stats
+from app.routers import users, books, loans, stats, category
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -21,7 +21,8 @@ app.add_middleware(
 app.include_router(users.router)
 app.include_router(books.router)
 app.include_router(loans.router)
-app.include_router(stats.router)  # ✅ Agregar stats router
+app.include_router(stats.router)
+app.include_router(category.router)
 
 @app.get("/")
 def root():
