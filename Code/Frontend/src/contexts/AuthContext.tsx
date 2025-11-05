@@ -58,12 +58,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Save token in localStorage
       localStorage.setItem('token', token);
 
-      // Temporary mock profile (until backend returns user data)
+      // Create user profile from backend response
       const mockProfile: UserProfile = {
         id: '1',
         email: email,
         full_name: email.split('@')[0],
-        role: email.includes('librarian') ? 'librarian' : 'user',
+        role: response.data.role === 'ADMIN' ? 'librarian' : 'user',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       };
