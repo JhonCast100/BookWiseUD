@@ -51,19 +51,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
 
-      // Backend returns a JWT token
-      const token = response.data.token;
+      // Backend returns a JWT token and user data
+      const { token, role, email: userEmail } = response.data;
       console.log('✅ JWT received:', token);
+      console.log('✅ Role received:', role);
 
       // Save token in localStorage
       localStorage.setItem('token', token);
 
-      // Temporary mock profile (until backend returns user data)
+      // Create user profile from backend data
       const mockProfile: UserProfile = {
         id: '1',
-        email: email,
-        full_name: email.split('@')[0],
-        role: email.includes('librarian') ? 'librarian' : 'user',
+        email: userEmail,
+        full_name: userEmail.split('@')[0],
+        role: role === 'ADMIN' ? 'librarian' : 'user',  // Convert backend ADMIN role to librarian
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       };
