@@ -104,11 +104,11 @@ def get_current_librarian(
     payload = decode_jwt(token)
     
     # Verificar roles desde el token
-    roles = payload.get("roles", [])
-    if "ROLE_LIBRARIAN" not in roles:
+    role = payload.get("role")
+    if role != "ADMIN":
         raise HTTPException(
             status_code=403, 
-            detail="Access denied. Librarian role required."
+            detail="Access denied. Admin role required."
         )
     
     # También obtener el usuario desde la DB

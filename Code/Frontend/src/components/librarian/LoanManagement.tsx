@@ -26,7 +26,7 @@ export default function LoanManagement() {
       setLoading(true);
       setError(null);
       const [loansData, booksData, usersData] = await Promise.all([
-        apiService.getLoans(),
+        apiService.getAllLoans(),
         apiService.getBooks(),
         apiService.getUsers()
       ]);

@@ -22,7 +22,7 @@ export interface ApiBook {
 export interface ApiLoan {
   loan_id?: number;
   book_id: number;
-  user_id?: number;  // Ya no se envía desde frontend, se toma del token
+  user_id?: number;
   loan_date?: string;
   return_date?: string;
   status?: string;
