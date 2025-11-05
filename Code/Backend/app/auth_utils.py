@@ -68,12 +68,20 @@ def get_current_user(
     if not user:
         print(f"Creating new user with email: {email}")
         
+        # Obtener el auth_id del token
+        auth_id = payload.get("auth_id")
+        if not auth_id:
+            raise HTTPException(
+                status_code=400, 
+                detail="Invalid token: missing auth_id"
+            )
+            
         # Crear el usuario
         user = User(
             email=email,
             full_name=email.split('@')[0],  # Usamos parte del email como nombre temporal
             status="active",
-            # No necesitamos auth_id ya que usaremos email para la relación
+            auth_id=auth_id  # ✅ Asignamos el auth_id del token
         )
         db.add(user)
         
@@ -103,39 +111,28 @@ def get_current_librarian(
     token = credentials.credentials
     payload = decode_jwt(token)
     
-    # Verificar roles desde el token
-    roles = payload.get("role", [])  # Spring Boot usa "role" en singular
-    if roles != "ADMIN":  # Spring Boot usa "ADMIN" para bibliotecarios
+    # Verificar authorities desde el token
+    authorities = payload.get("authorities", [])
+    
+    # Verificar si el usuario es admin
+    is_admin = "ADMIN" in authorities
+    
+    if not is_admin:
         raise HTTPException(
             status_code=403, 
-            detail="Access denied. Administrator role required."
+            detail="Access denied. Admin role required."
         )
     
-    # Obtener el email del token
-    email = payload.get("sub")  # Spring Boot usa 'sub' para el email
+    # Obtener el correo electrónico del token
+    email = payload.get("sub")
     if email is None:
         raise HTTPException(status_code=400, detail="Invalid token: missing subject (email)")
     
-    # Buscar el usuario por email
+    # Obtener el usuario por email
     user = db.query(User).filter(User.email == email).first()
     
     if not user:
-        # Si el usuario no existe en la base de datos de FastAPI, lo creamos
-        user = User(
-            email=email,
-            full_name=email.split('@')[0],  # Usamos parte del email como nombre temporal
-            status="active"
-        )
-        db.add(user)
-        try:
-            db.commit()
-            db.refresh(user)
-        except Exception as e:
-            db.rollback()
-            raise HTTPException(
-                status_code=500,
-                detail="Error creating user in database"
-            )
+        raise HTTPException(status_code=404, detail="User not found")
     
     return user
 

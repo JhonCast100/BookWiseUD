@@ -35,16 +35,20 @@ public class AuthService {
     }
 
     public AuthResponse register(RegisterRequest request) {
+        Role role = (request.getRole() != null && request.getRole().equals("ADMIN")) ? Role.ADMIN : Role.USER;
+        
         User user = User.builder()
             .username(request.getUsername())
             .password(passwordEncoder.encode(request.getPassword()))
-            .role(Role.USER)
+            .role(role)
             .build();
 
         userRepository.save(user);
-
+        String token = jwtService.getToken(user);
+        
         return AuthResponse.builder()
-            .token(jwtService.getToken(user))
+            .token(token)
+            .role(role.name())
             .build();
     }
 }

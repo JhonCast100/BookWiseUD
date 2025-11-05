@@ -1,14 +1,21 @@
 package com.example.Authentication.Jwt;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
 import javax.crypto.SecretKey;
 
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+
+import com.example.Authentication.User.User;
+import com.example.Authentication.User.Role;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -24,15 +31,23 @@ public class JwtService {
         return getToken(new HashMap<>(), user);
     }
 
-    private String getToken(Map<String, Object> extraClaims, UserDetails user) {
-        return Jwts
-                .builder()
-                .claims(extraClaims)  
-                .subject(user.getUsername()) 
-                .issuedAt(new Date(System.currentTimeMillis()))  
-                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 24)) 
-                .signWith(getKey())  
-                .compact();
+    private String getToken(Map<String, Object> extraClaims, UserDetails userDetails) {
+        Map<String, Object> claims = new HashMap<>(extraClaims);
+        
+        // Obtener las authorities del usuario
+        var authorities = userDetails.getAuthorities().stream()
+            .map(authority -> authority.getAuthority())
+            .toList();
+            
+        claims.put("authorities", authorities);
+            
+        return Jwts.builder()
+            .claims(claims)
+            .subject(userDetails.getUsername())
+            .issuedAt(new Date(System.currentTimeMillis()))
+            .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 24))
+            .signWith(getKey())
+            .compact();
     }
 
     private SecretKey getKey() {  
