@@ -6,6 +6,7 @@ export default function BookManagement() {
   const [books, setBooks] = useState<ApiBook[]>([]);
   const [categories, setCategories] = useState<ApiCategory[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState<number | ''>('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBook, setEditingBook] = useState<ApiBook | null>(null);
   const [formData, setFormData] = useState<Partial<ApiBook>>({
@@ -20,6 +21,15 @@ export default function BookManagement() {
 
   useEffect(() => {
     loadBooks();
+    // Cargar categorías al montar para el filtro
+    (async () => {
+      try {
+        const cats = await apiService.getCategories();
+        setCategories(cats);
+      } catch (err) {
+        console.warn('Could not load categories on mount', err);
+      }
+    })();
   }, []);
 
   const loadBooks = async () => {
@@ -37,9 +47,10 @@ export default function BookManagement() {
   };
 
   const filteredBooks = books.filter(book =>
-    book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     book.author.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    book.isbn.includes(searchTerm)
+    book.isbn.includes(searchTerm)) &&
+    (categoryFilter === '' || book.category_id === categoryFilter)
   );
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -134,15 +145,29 @@ export default function BookManagement() {
         </button>
       </div>
 
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" size={20} />
-        <input
-          type="text"
-          placeholder="Search by title, author or ISBN..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
-        />
+      <div className="flex items-center gap-4">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" size={20} />
+          <input
+            type="text"
+            placeholder="Search by title, author or ISBN..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          />
+        </div>
+        <div className="w-64">
+          <select
+            value={categoryFilter}
+            onChange={(e) => setCategoryFilter(e.target.value === '' ? '' : Number(e.target.value))}
+            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          >
+            <option value="">All categories</option>
+            {categories.map(cat => (
+              <option key={cat.category_id} value={cat.category_id}>{cat.name}</option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {error && (
@@ -184,6 +209,7 @@ export default function BookManagement() {
               <h3 className="font-bold text-lg text-slate-800 mb-2">{book.title}</h3>
               <p className="text-slate-600 mb-1">Author: {book.author}</p>
               <p className="text-slate-500 text-sm mb-1">ISBN: {book.isbn}</p>
+              <p className="text-slate-500 text-sm mb-1">Category: {categories.find(cat => cat.category_id === book.category_id)?.name || 'Uncategorized'}</p>
 
               <div className="flex justify-between items-center pt-4 border-t border-slate-200">
                 <span className={`text-sm font-semibold ${book.status === 'available' ? 'text-green-600' : 'text-red-600'}`}>
