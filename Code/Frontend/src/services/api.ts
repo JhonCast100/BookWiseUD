@@ -70,68 +70,49 @@ class ApiService {
   // ✅ NUEVO: Crear usuario en ambos backends (MySQL + PostgreSQL)
   async createUserComplete(userData: CreateUserCompleteRequest): Promise<ApiUser> {
     try {
-      console.log('🔄 Step 1: Creating user in MySQL (auth)...');
-      
-      // 1. Crear usuario en Spring Boot (MySQL)
+      // 1. Crear usuario en Spring Boot
       const authResponse = await authClient.post('/auth/register', {
-        username: userData.email,  // Spring Boot usa username
+        username: userData.email,
         password: userData.password,
         role: userData.role
       });
 
       const { token } = authResponse.data;
-      console.log('✅ Step 1 complete: User created in MySQL');
-      console.log('📋 Token received:', token.substring(0, 20) + '...');
+      console.log('Token JWT:', token);
 
-      // 2. Decodificar el token para obtener auth_id
+      // 2. Decodificar token para extraer auth_id
       const tokenParts = token.split('.');
-      const payload = JSON.parse(atob(tokenParts[1]));
-      const authId = payload.auth_id;
-      
-      console.log('🔑 Auth ID from token:', authId);
+      const payloadJson = atob(tokenParts[1]);
+      console.log('Token payload:', payloadJson);
+      const payload = JSON.parse(payloadJson);
 
-      if (!authId) {
-        throw new Error('auth_id not found in token. Make sure Spring Boot includes it.');
-      }
+      // Ajustar según cómo venga el ID
+      const authId = payload.auth_id || payload.userId || payload.sub;
+      if (!authId) throw new Error('auth_id not found in token');
 
-      console.log('🔄 Step 2: Creating user in PostgreSQL (library)...');
-
-      // 3. Crear usuario en FastAPI (PostgreSQL) usando el token
+      // 3. Crear usuario en PostgreSQL
       const tempToken = localStorage.getItem('token');
-      localStorage.setItem('token', token); // Temporalmente usar el nuevo token
+      localStorage.setItem('token', token);
 
       const libraryUser: ApiUser = {
         full_name: userData.username,
         email: userData.email,
         phone: userData.phone,
         status: 'active',
-        auth_id: authId
+        auth_id: Number(authId)
       };
 
       const libraryResponse = await apiClient.post('/users/', libraryUser);
-      
-      // Restaurar el token original
-      if (tempToken) {
-        localStorage.setItem('token', tempToken);
-      }
 
-      console.log('✅ Step 2 complete: User created in PostgreSQL');
-      console.log('✅ User synchronization successful!');
+      if (tempToken) localStorage.setItem('token', tempToken);
 
       return libraryResponse.data;
     } catch (error: any) {
-      console.error('❌ Error creating user:', error);
-      
-      // Mensajes de error más específicos
-      if (error.response?.data?.message) {
-        throw new Error(error.response.data.message);
-      } else if (error.response?.data?.detail) {
-        throw new Error(error.response.data.detail);
-      } else {
-        throw new Error('Failed to create user. Please try again.');
-      }
+      console.error('Error creating user:', error);
+      throw new Error(error.response?.data?.message || error.message || 'Failed to create user.');
     }
   }
+
 
   async updateUser(userId: number, user: ApiUser): Promise<ApiUser> {
     const response = await apiClient.put(`/users/${userId}`, user);
@@ -180,7 +161,7 @@ class ApiService {
   }
 
   // ==================== LOAN ENDPOINTS ====================
-  
+
   async getAllLoans(): Promise<ApiLoan[]> {
     const response = await apiClient.get('/loans/');
     return response.data;
