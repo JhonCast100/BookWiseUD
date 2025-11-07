@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { apiService, ApiUser } from '../../services/api';
 import { Users, Plus, Search, CreditCard as Edit2, Trash2, X, Mail, Phone } from 'lucide-react';
 import axios from 'axios';
+import {jwtDecode} from 'jwt-decode';
 
 interface UserFormData extends Partial<ApiUser> {
   password?: string;
@@ -77,11 +78,11 @@ export default function UserManagement() {
         });
 
         const token = response.data.token;
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        authId = payload.auth_id;
+        const decoded = jwtDecode<{ id: number }>(token);
+        authId = decoded.id;
 
         if (!authId) {
-          throw new Error('auth_id not found in token. Make sure Spring Boot includes it.');
+          throw new Error('ID not found in token');
         }
       }
 
