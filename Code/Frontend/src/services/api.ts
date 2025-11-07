@@ -1,4 +1,4 @@
-import { apiClient } from './axiosConfig';
+import { apiClient, authClient } from './axiosConfig';
 
 export interface ApiCategory {
   category_id: number;
@@ -34,6 +34,15 @@ export interface ApiLoan {
   status?: string;
 }
 
+// ✅ Nueva interfaz para crear usuario completo
+export interface CreateUserCompleteRequest {
+  username: string;
+  email: string;
+  password: string;
+  phone?: string;
+  role: 'USER' | 'ADMIN';
+}
+
 
 class ApiService {
   // ==================== CATEGORY ENDPOINTS ====================
@@ -41,6 +50,7 @@ class ApiService {
     const response = await apiClient.get('/categories/');
     return response.data;
   }
+
   // ==================== USER ENDPOINTS ====================
   async getUsers(): Promise<ApiUser[]> {
     const response = await apiClient.get('/users/');
@@ -55,6 +65,72 @@ class ApiService {
   async createUser(user: ApiUser): Promise<ApiUser> {
     const response = await apiClient.post('/users/', user);
     return response.data;
+  }
+
+  // ✅ NUEVO: Crear usuario en ambos backends (MySQL + PostgreSQL)
+  async createUserComplete(userData: CreateUserCompleteRequest): Promise<ApiUser> {
+    try {
+      console.log('🔄 Step 1: Creating user in MySQL (auth)...');
+      
+      // 1. Crear usuario en Spring Boot (MySQL)
+      const authResponse = await authClient.post('/auth/register', {
+        username: userData.email,  // Spring Boot usa username
+        password: userData.password,
+        role: userData.role
+      });
+
+      const { token } = authResponse.data;
+      console.log('✅ Step 1 complete: User created in MySQL');
+      console.log('📋 Token received:', token.substring(0, 20) + '...');
+
+      // 2. Decodificar el token para obtener auth_id
+      const tokenParts = token.split('.');
+      const payload = JSON.parse(atob(tokenParts[1]));
+      const authId = payload.auth_id;
+      
+      console.log('🔑 Auth ID from token:', authId);
+
+      if (!authId) {
+        throw new Error('auth_id not found in token. Make sure Spring Boot includes it.');
+      }
+
+      console.log('🔄 Step 2: Creating user in PostgreSQL (library)...');
+
+      // 3. Crear usuario en FastAPI (PostgreSQL) usando el token
+      const tempToken = localStorage.getItem('token');
+      localStorage.setItem('token', token); // Temporalmente usar el nuevo token
+
+      const libraryUser: ApiUser = {
+        full_name: userData.username,
+        email: userData.email,
+        phone: userData.phone,
+        status: 'active',
+        auth_id: authId
+      };
+
+      const libraryResponse = await apiClient.post('/users/', libraryUser);
+      
+      // Restaurar el token original
+      if (tempToken) {
+        localStorage.setItem('token', tempToken);
+      }
+
+      console.log('✅ Step 2 complete: User created in PostgreSQL');
+      console.log('✅ User synchronization successful!');
+
+      return libraryResponse.data;
+    } catch (error: any) {
+      console.error('❌ Error creating user:', error);
+      
+      // Mensajes de error más específicos
+      if (error.response?.data?.message) {
+        throw new Error(error.response.data.message);
+      } else if (error.response?.data?.detail) {
+        throw new Error(error.response.data.detail);
+      } else {
+        throw new Error('Failed to create user. Please try again.');
+      }
+    }
   }
 
   async updateUser(userId: number, user: ApiUser): Promise<ApiUser> {
@@ -105,13 +181,11 @@ class ApiService {
 
   // ==================== LOAN ENDPOINTS ====================
   
-  // Solo para bibliotecarios: ver todos los préstamos
   async getAllLoans(): Promise<ApiLoan[]> {
     const response = await apiClient.get('/loans/');
     return response.data;
   }
 
-  // Para usuarios: ver sus propios préstamos
   async getMyLoans(): Promise<ApiLoan[]> {
     const response = await apiClient.get('/loans/me');
     return response.data;
@@ -127,7 +201,6 @@ class ApiService {
     return response.data;
   }
 
-  // Crear préstamo (usuario solicita, se asocia automáticamente con su user_id)
   async createLoan(loan: { book_id: number; loan_date?: string }): Promise<ApiLoan> {
     const response = await apiClient.post('/loans/', loan);
     return response.data;

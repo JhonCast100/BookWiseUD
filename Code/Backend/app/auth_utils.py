@@ -22,22 +22,21 @@ def decode_jwt(token: str) -> dict:
     Decodifica y valida el token JWT emitido por Spring Boot
     """
     try:
-        # Añadir verificación de token vacío o None
         if not token:
             raise HTTPException(status_code=401, detail="No token provided")
         
-        print(f"Decoding token: {token[:20]}...")  # Imprime los primeros 20 caracteres del token
+        print(f"Decoding token: {token[:20]}...")
         payload = jwt.decode(token, DECODED_KEY, algorithms=[ALGORITHM])
-        print(f"Decoded payload: {payload}")  # Imprime el contenido del token
-        return payload  # Contiene: auth_id, email, roles, exp, etc.
+        print(f"✅ Decoded payload: {payload}")
+        return payload
     except jwt.ExpiredSignatureError as e:
-        print(f"Token expired: {str(e)}")
+        print(f"❌ Token expired: {str(e)}")
         raise HTTPException(status_code=401, detail="Token has expired")
     except jwt.InvalidTokenError as e:
-        print(f"Invalid token: {str(e)}")
+        print(f"❌ Invalid token: {str(e)}")
         raise HTTPException(status_code=401, detail="Invalid token")
     except Exception as e:
-        print(f"Unexpected error decoding token: {str(e)}")
+        print(f"❌ Unexpected error decoding token: {str(e)}")
         raise HTTPException(status_code=401, detail=f"Token error: {str(e)}")
 
 
@@ -47,50 +46,43 @@ def get_current_user(
 ) -> User:
     """
     Obtiene el usuario actual desde el token JWT.
-    Este usuario debe existir en la base de datos de FastAPI.
+    Si no existe en PostgreSQL, lo crea automáticamente.
     """
-    # Extraer el token del header Authorization: Bearer <token>
     token = credentials.credentials
-    
-    # Decodificar el token
     payload = decode_jwt(token)
-    print("Token payload:", payload)  # Para depuración
+    print("📋 Token payload:", payload)
     
-    # Obtener el correo electrónico del subject del token
-    email = payload.get("sub")  # Spring Boot usa 'sub' para el email
+    # ✅ Extraer email y auth_id del token
+    email = payload.get("sub")
+    auth_id = payload.get("auth_id")
+    
     if email is None:
         raise HTTPException(status_code=400, detail="Invalid token: missing subject (email)")
     
-    # Buscar el usuario por email
+    if auth_id is None:
+        raise HTTPException(status_code=400, detail="Invalid token: missing auth_id")
+    
+    # Buscar usuario por email
     user = db.query(User).filter(User.email == email).first()
     
-    # Si el usuario no existe, lo creamos
+    # ✅ Si no existe, crear usuario con auth_id
     if not user:
-        print(f"Creating new user with email: {email}")
+        print(f"👤 Creating new user with email: {email}, auth_id: {auth_id}")
         
-        # Obtener el auth_id del token
-        auth_id = payload.get("auth_id")
-        if not auth_id:
-            raise HTTPException(
-                status_code=400, 
-                detail="Invalid token: missing auth_id"
-            )
-            
-        # Crear el usuario
         user = User(
             email=email,
-            full_name=email.split('@')[0],  # Usamos parte del email como nombre temporal
+            full_name=email.split('@')[0],  # Nombre temporal
             status="active",
-            auth_id=auth_id  # ✅ Asignamos el auth_id del token
+            auth_id=auth_id  # ✅ Guardar el ID de MySQL
         )
         db.add(user)
         
         try:
             db.commit()
             db.refresh(user)
-            print(f"User created successfully with ID: {user.user_id}")
+            print(f"✅ User created successfully with ID: {user.user_id}, auth_id: {user.auth_id}")
         except Exception as e:
-            print(f"Error creating user: {str(e)}")
+            print(f"❌ Error creating user: {str(e)}")
             db.rollback()
             raise HTTPException(
                 status_code=500,
@@ -105,8 +97,7 @@ def get_current_librarian(
     db: Session = Depends(get_db)
 ) -> User:
     """
-    Verifica que el usuario actual sea un bibliotecario.
-    Útil para endpoints que requieren permisos de librarian.
+    Verifica que el usuario actual sea un bibliotecario (ADMIN).
     """
     token = credentials.credentials
     payload = decode_jwt(token)
@@ -115,7 +106,7 @@ def get_current_librarian(
     authorities = payload.get("authorities", [])
     
     # Verificar si el usuario es admin
-    is_admin = "ADMIN" in authorities
+    is_admin = "ADMIN" in authorities or "ROLE_ADMIN" in authorities
     
     if not is_admin:
         raise HTTPException(
@@ -143,7 +134,6 @@ def optional_auth(
 ) -> User | None:
     """
     Autenticación opcional. Retorna el usuario si está autenticado, None si no.
-    Útil para endpoints públicos que pueden personalizar la respuesta si hay usuario.
     """
     if credentials is None:
         return None

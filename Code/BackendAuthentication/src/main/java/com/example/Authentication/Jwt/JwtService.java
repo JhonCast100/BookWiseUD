@@ -27,8 +27,11 @@ public class JwtService {
 
     private static final String SECRET_KEY = "MTkxNTYyMDIzMTE4NTUxNDc5MTQ1NTE4OTE0NzE5NTEzOTE0MTE4";
 
-    public String getToken(UserDetails user) {
-        return getToken(new HashMap<>(), user);
+    // ✅ MODIFICADO: Acepta el objeto User completo para obtener el ID
+    public String getToken(User user) {
+        Map<String, Object> extraClaims = new HashMap<>();
+        extraClaims.put("auth_id", user.getId()); // ✅ Incluir el ID del usuario
+        return getToken(extraClaims, user);
     }
 
     private String getToken(Map<String, Object> extraClaims, UserDetails userDetails) {

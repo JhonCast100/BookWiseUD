@@ -24,32 +24,36 @@ public class AuthService {
 
     public AuthResponse login(LoginRequest request) {
         authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
-        );
+                new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
+        
         User user = userRepository.findByUsername(request.getUsername()).orElseThrow();
+        
+        // ✅ MODIFICADO: Pasar el objeto User completo
         String token = jwtService.getToken(user);
+        
         return AuthResponse.builder()
-            .token(token)
-            .role(user.getRole().toString())
-            .email(user.getUsername())
-            .build();
+                .token(token)
+                .role(user.getRole().name())
+                .email(user.getUsername())
+                .build();
     }
 
     public AuthResponse register(RegisterRequest request) {
-        Role role = (request.getRole() != null && request.getRole().equals("ADMIN")) ? Role.ADMIN : Role.USER;
-        
         User user = User.builder()
-            .username(request.getUsername())
-            .password(passwordEncoder.encode(request.getPassword()))
-            .role(role)
-            .build();
+                .username(request.getUsername())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .role(Role.valueOf(request.getRole()))
+                .build();
 
         userRepository.save(user);
+
+        // ✅ MODIFICADO: Pasar el objeto User completo (que ahora tiene ID)
         String token = jwtService.getToken(user);
-        
+
         return AuthResponse.builder()
-            .token(token)
-            .role(role.name())
-            .build();
+                .token(token)
+                .role(user.getRole().name())
+                .email(user.getUsername())
+                .build();
     }
 }
