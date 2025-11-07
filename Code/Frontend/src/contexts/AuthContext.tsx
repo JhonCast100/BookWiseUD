@@ -1,7 +1,18 @@
 // src/contexts/AuthContext.tsx
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { jwtDecode } from 'jwt-decode'; // ✅ Importación correcta
 import { UserProfile } from '../types';
 import { authClient } from '../services/axiosConfig';
+
+interface TokenPayload {
+  id: number;
+  username: string;
+  rol: 'USER' | 'ADMIN';
+  sub: string;
+  iat: number;
+  exp: number;
+  auth_id?: number;
+}
 
 interface User {
   id: string;
@@ -14,7 +25,7 @@ interface AuthContextType {
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signUp: (email: string, password: string, fullName: string, role: 'librarian' | 'user') => Promise<{ error: Error | null }>;
-  signOut: () => Promise<void>;
+  signOut: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -24,138 +35,141 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Cargar sesión desde localStorage
   useEffect(() => {
-    const checkSession = async () => {
-      const token = localStorage.getItem('token');
-      const savedProfile = localStorage.getItem('mock_profile');
+    const token = localStorage.getItem('token');
+    const savedProfile = localStorage.getItem('mock_profile');
 
-      if (token && savedProfile) {
-        try {
-          const profile = JSON.parse(savedProfile);
-          setUser({ id: profile.id, email: profile.email });
-          setUserProfile(profile);
-        } catch (error) {
-          console.error('Error loading session:', error);
-          localStorage.clear();
-        }
+    if (token && savedProfile) {
+      try {
+        const profile = JSON.parse(savedProfile);
+        setUser({ id: profile.id, email: profile.email });
+        setUserProfile(profile);
+      } catch {
+        localStorage.clear();
       }
-      setLoading(false);
-    };
-
-    checkSession();
+    }
+    setLoading(false);
   }, []);
 
+  // LOGIN
   const signIn = async (email: string, password: string) => {
     try {
-      console.log('🔐 Logging in...');
-      
+      console.log('🔑 Attempting login...');
+
       const response = await authClient.post('/auth/login', {
-        username: email, 
+        username: email,
         password
       });
 
-      const { token, role, email: userEmail } = response.data;
-      console.log('✅ JWT received');
-      console.log('✅ Role:', role);
+      console.log('📡 Response status:', response.status);
 
-      // Guardar token
-      localStorage.setItem('token', token);
+      const { token } = response.data;
 
-      // Determinar el rol correcto
-      let userRole: 'librarian' | 'user' = 'user';
-      if (role === 'ADMIN' || role === 'ROLE_ADMIN' || role === 'LIBRARIAN' || role === 'ROLE_LIBRARIAN') {
-        userRole = 'librarian';
+      if (!token) {
+        throw new Error('No token received from server');
       }
 
-      const mockProfile: UserProfile = {
-        id: '1',
-        email: userEmail || email,
-        full_name: (userEmail || email).split('@')[0],
-        role: userRole,
+      console.log('🎟️ Token received:', token.substring(0, 30) + '...');
+
+      // ✅ Decodificar JWT correctamente
+      const decoded = jwtDecode<TokenPayload>(token);
+      console.log('🔓 Token decoded:', decoded);
+
+      const roleFront = decoded.rol === 'ADMIN' ? 'librarian' : 'user';
+
+      const profile: UserProfile = {
+        id: decoded.id.toString(),
+        email: decoded.username,
+        full_name: decoded.username.split('@')[0],
+        role: roleFront,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       };
 
-      setUser({ id: '1', email: userEmail || email });
-      setUserProfile(mockProfile);
+      setUser({ id: decoded.id.toString(), email: decoded.username });
+      setUserProfile(profile);
 
-      localStorage.setItem('mock_user', JSON.stringify({ id: '1', email: userEmail || email }));
-      localStorage.setItem('mock_profile', JSON.stringify(mockProfile));
+      localStorage.setItem('token', token);
+      localStorage.setItem('mock_user', JSON.stringify({ id: decoded.id.toString(), email: decoded.username }));
+      localStorage.setItem('mock_profile', JSON.stringify(profile));
 
-      console.log('✅ Login successful - Role:', userRole);
-
+      console.log('✅ Login successful!');
       return { error: null };
     } catch (error: any) {
       console.error('❌ Login error:', error);
+      console.error('❌ Error response:', error.response?.data);
+
       localStorage.clear();
-      
-      const errorMessage = error.response?.data?.message || 
-                          error.response?.data?.error || 
-                          'Login failed. Please check your credentials.';
-      
+      setUser(null);
+      setUserProfile(null);
+
+      const errorMessage = error.response?.data?.message ||
+        error.response?.data?.error ||
+        error.message ||
+        'Login failed';
+
       return { error: new Error(errorMessage) };
     }
   };
 
+  // SIGNUP
   const signUp = async (email: string, password: string, fullName: string, role: 'librarian' | 'user') => {
     try {
-      console.log('📝 Registering...');
-      
-      // Convertir rol para el backend
+      console.log('📝 Attempting registration...');
+
       const backendRole = role === 'librarian' ? 'ADMIN' : 'USER';
-      
       const response = await authClient.post('/auth/register', {
-        email,
+        username: email,
         password,
-        fullName,
-        role: backendRole
+        role: backendRole,
       });
 
-      const { token, role: returnedRole } = response.data;
-      console.log('✅ Registration successful');
-      console.log('✅ Token received');
+      console.log('📡 Registration response:', response.status);
 
-      localStorage.setItem('token', token);
+      const { token } = response.data;
 
-      // Determinar el rol correcto
-      let userRole: 'librarian' | 'user' = 'user';
-      if (returnedRole === 'ADMIN' || returnedRole === 'ROLE_ADMIN' || returnedRole === 'LIBRARIAN') {
-        userRole = 'librarian';
+      if (!token) {
+        throw new Error('No token received from server');
       }
 
-      const mockUser: User = {
-        id: Date.now().toString(),
-        email: email,
-      };
+      // ✅ Decodificar JWT correctamente
+      const decoded = jwtDecode<TokenPayload>(token);
+      const roleFront = decoded.rol === 'ADMIN' ? 'librarian' : 'user';
 
-      const mockProfile: UserProfile = {
-        id: mockUser.id,
-        email,
+      const profile: UserProfile = {
+        id: decoded.id.toString(),
+        email: decoded.username,
         full_name: fullName,
-        role: userRole,
+        role: roleFront,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       };
 
-      setUser(mockUser);
-      setUserProfile(mockProfile);
+      setUser({ id: decoded.id.toString(), email: decoded.username });
+      setUserProfile(profile);
 
-      localStorage.setItem('mock_user', JSON.stringify(mockUser));
-      localStorage.setItem('mock_profile', JSON.stringify(mockProfile));
+      localStorage.setItem('token', token);
+      localStorage.setItem('mock_user', JSON.stringify({ id: decoded.id.toString(), email: decoded.username }));
+      localStorage.setItem('mock_profile', JSON.stringify(profile));
 
+      console.log('✅ Registration successful!');
       return { error: null };
     } catch (error: any) {
       console.error('❌ Registration error:', error);
-      
-      const errorMessage = error.response?.data?.message || 
-                          error.response?.data?.error || 
-                          'Registration failed. Please try again.';
-      
+      console.error('❌ Error response:', error.response?.data);
+
+      const errorMessage = error.response?.data?.message ||
+        error.response?.data?.error ||
+        error.message ||
+        'Registration failed';
+
       return { error: new Error(errorMessage) };
     }
   };
 
-  const signOut = async () => {
+  // SIGNOUT
+  const signOut = () => {
     console.log('👋 Signing out...');
     setUser(null);
     setUserProfile(null);
@@ -171,8 +185,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 export function useAuth() {
   const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
+  if (!context) throw new Error('useAuth must be used within an AuthProvider');
   return context;
 }
