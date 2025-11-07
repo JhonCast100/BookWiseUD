@@ -7,6 +7,11 @@ interface UserFormData extends Partial<ApiUser> {
   role?: 'USER' | 'ADMIN';
 }
 
+interface UserFormData extends Partial<ApiUser> {
+  password?: string;
+  role?: 'USER' | 'ADMIN';
+}
+
 export default function UserManagement() {
   const [users, setUsers] = useState<ApiUser[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -55,7 +60,11 @@ export default function UserManagement() {
       setError(null);
 
       if (editingUser && editingUser.user_id) {
+<<<<<<< HEAD
         // Actualizar usuario existente (solo en PostgreSQL)
+=======
+        // Actualizar usuario existente (solo en FastAPI)
+>>>>>>> 5700c8ba2e9b7d08161d83ae63b70beb757622f6
         const userData: ApiUser = {
           full_name: formData.full_name || '',
           email: formData.email || '',
@@ -84,7 +93,11 @@ export default function UserManagement() {
       await loadUsers();
       closeModal();
     } catch (err: any) {
+<<<<<<< HEAD
       const errorMessage = err.message || err.response?.data?.message || 'Error saving user';
+=======
+      const errorMessage = err.response?.data?.message || err.message || 'Error saving user';
+>>>>>>> 5700c8ba2e9b7d08161d83ae63b70beb757622f6
       setError(errorMessage);
       console.error(err);
     } finally {
@@ -200,7 +213,13 @@ export default function UserManagement() {
                   </div>
                   <div>
                     <h3 className="font-bold text-lg text-slate-800">{user.full_name}</h3>
+<<<<<<< HEAD
                     <p className="text-xs text-slate-500">ID: {user.user_id}</p>
+=======
+                    {user.auth_id && (
+                      <span className="text-xs text-slate-500">Auth ID: {user.auth_id}</span>
+                    )}
+>>>>>>> 5700c8ba2e9b7d08161d83ae63b70beb757622f6
                   </div>
                 </div>
                 <div className="flex gap-2">
@@ -359,6 +378,7 @@ export default function UserManagement() {
               {!editingUser && (
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                   <p className="text-sm text-blue-800">
+<<<<<<< HEAD
                     <strong>Note:</strong> This will create the user in both the authentication system (MySQL) and the library system (PostgreSQL). The Auth ID will be automatically assigned.
                   </p>
                 </div>
@@ -368,6 +388,9 @@ export default function UserManagement() {
                 <div className="bg-slate-50 border border-slate-200 rounded-lg p-4">
                   <p className="text-sm text-slate-700">
                     <strong>Auth ID:</strong> {editingUser.auth_id} (Cannot be modified)
+=======
+                    <strong>Note:</strong> This will create the user in both the authentication system (MySQL) and the library system (PostgreSQL).
+>>>>>>> 5700c8ba2e9b7d08161d83ae63b70beb757622f6
                   </p>
                 </div>
               )}
