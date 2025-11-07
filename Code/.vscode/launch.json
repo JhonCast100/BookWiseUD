@@ -2,6 +2,12 @@
     "configurations": [
         {
             "type": "java",
+            "name": "AuthenticationApplication",
+            "request": "launch",
+            "mainClass": "com.example.Authentication.AuthenticationApplication"
+        },
+        {
+            "type": "java",
             "name": "Spring Boot-AuthenticationApplication<Authentication>",
             "request": "launch",
             "cwd": "${workspaceFolder}",

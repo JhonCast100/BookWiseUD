@@ -10,6 +10,8 @@ import javax.crypto.SecretKey;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import com.example.Authentication.User.User;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
@@ -20,22 +22,31 @@ public class JwtService {
 
     private static final String SECRET_KEY = "MTkxNTYyMDIzMTE4NTUxNDc5MTQ1NTE4OTE0NzE5NTEzOTE0MTE4";
 
-    public String getToken(UserDetails user) {
-        return getToken(new HashMap<>(), user);
+    public String getToken(UserDetails userDetails) {
+
+        // Convertimos para acceder a id y rol
+        User user = (User) userDetails;
+
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("id", user.getId());
+        claims.put("username", user.getUsername());
+        claims.put("rol", user.getRole().name()); // <--- aquí el rol
+
+        return buildToken(claims, userDetails);
     }
 
-    private String getToken(Map<String, Object> extraClaims, UserDetails user) {
+    private String buildToken(Map<String, Object> claims, UserDetails user) {
         return Jwts
                 .builder()
-                .claims(extraClaims)  // Cambio: claims() en lugar de setClaims()
-                .subject(user.getUsername())  // Cambio: subject() en lugar de setSubject()
-                .issuedAt(new Date(System.currentTimeMillis()))  // Cambio: issuedAt()
-                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 24))  // Cambio: expiration()
-                .signWith(getKey())  // Cambio: solo getKey(), sin SignatureAlgorithm
+                .claims(claims) // agrega id, username, rol
+                .subject(user.getUsername())
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24)) // 24 horas
+                .signWith(getKey())
                 .compact();
     }
 
-    private SecretKey getKey() {  // Cambio: SecretKey en lugar de Key
+    private SecretKey getKey() {
         byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
         return Keys.hmacShaKeyFor(keyBytes);
     }
@@ -51,11 +62,11 @@ public class JwtService {
 
     private Claims getAllClaims(String token) {
         return Jwts
-                .parser()  // Cambio: parser() en lugar de parserBuilder()
-                .verifyWith(getKey())  // Cambio: verifyWith() en lugar de setSigningKey()
+                .parser()
+                .verifyWith(getKey())
                 .build()
-                .parseSignedClaims(token)  // Cambio: parseSignedClaims() en lugar de parseClaimsJws()
-                .getPayload();  // Cambio: getPayload() en lugar de getBody()
+                .parseSignedClaims(token)
+                .getPayload();
     }
 
     public <T> T getClaim(String token, Function<Claims, T> claimsResolver) {
