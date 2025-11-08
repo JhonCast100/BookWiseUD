@@ -1,3 +1,4 @@
+# app/schemas.py
 from pydantic import BaseModel
 from typing import Optional
 from datetime import date
@@ -12,7 +13,7 @@ class CategoryCreate(CategoryBase):
 class Category(CategoryBase):
     category_id: int
     class Config:
-        orm_mode = True
+        from_attributes = True  # ✅ Cambiado de orm_mode
 
 
 class BookBase(BaseModel):
@@ -29,7 +30,7 @@ class BookCreate(BookBase):
 class Book(BookBase):
     book_id: int
     class Config:
-        orm_mode = True
+        from_attributes = True  # ✅ Cambiado de orm_mode
 
 
 class UserBase(BaseModel):
@@ -45,24 +46,23 @@ class UserCreate(UserBase):
 class User(UserBase):
     user_id: int
     class Config:
-        orm_mode = True
+        from_attributes = True  # ✅ Cambiado de orm_mode
 
 
-# ✅ ACTUALIZADO: user_id ahora es opcional porque se toma del JWT
 class LoanBase(BaseModel):
     book_id: int
-    user_id: Optional[int] = None  # Opcional - se obtiene del token
+    user_id: Optional[int] = None
     loan_date: Optional[date] = None
     return_date: Optional[date] = None
     status: Optional[str] = "active"
 
-# ✅ ACTUALIZADO: LoanCreate solo necesita book_id
 class LoanCreate(BaseModel):
     book_id: int
+    user_id: int  # ✅ AGREGAR ESTE CAMPO (requerido, no opcional)
     loan_date: Optional[date] = None
 
 class Loan(LoanBase):
     loan_id: int
     user_id: int  
     class Config:
-        orm_mode = True
+        from_attributes = True  # ✅ Cambiado de orm_mode

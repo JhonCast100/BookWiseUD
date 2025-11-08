@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
-from app import models
+from app.models.category import Category
 
 def get_categories(db: Session):
-    return db.query(models.Category).all()
+    """Obtener todas las categorías"""
+    return db.query(Category).all()
