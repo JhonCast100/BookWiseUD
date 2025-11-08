@@ -1,8 +1,11 @@
+# app/routers/stats.py
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from app.database import get_db
-from app import models
+from app.models.user import User  # ✅ Importación explícita
+from app.models.book import Book  # ✅ Importación explícita
+from app.models.loan import Loan  # ✅ Importación explícita
 from app.auth_utils import get_current_user
 
 router = APIRouter(prefix="/stats", tags=["Statistics"])
@@ -11,19 +14,19 @@ router = APIRouter(prefix="/stats", tags=["Statistics"])
 @router.get("/dashboard")
 def get_dashboard_stats(
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user)  # ✅ Usa User directamente
 ):
     """
     Obtiene estadísticas para el dashboard.
     Todos los usuarios autenticados pueden ver estas estadísticas.
     """
-    total_books = db.query(func.count(models.Book.book_id)).scalar()
-    total_users = db.query(func.count(models.User.user_id)).scalar()
-    active_loans = db.query(func.count(models.Loan.loan_id))\
-        .filter(models.Loan.status == "active")\
+    total_books = db.query(func.count(Book.book_id)).scalar()
+    total_users = db.query(func.count(User.user_id)).scalar()
+    active_loans = db.query(func.count(Loan.loan_id))\
+        .filter(Loan.status == "active")\
         .scalar()
-    available_books = db.query(func.count(models.Book.book_id))\
-        .filter(models.Book.status == "available")\
+    available_books = db.query(func.count(Book.book_id))\
+        .filter(Book.status == "available")\
         .scalar()
     
     return {

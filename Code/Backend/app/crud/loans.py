@@ -1,19 +1,24 @@
 from sqlalchemy.orm import Session
 from datetime import date
-from app import models, schemas
+from app.models.loan import Loan
+from app.models.book import Book
+from app import schemas
 
 def get_loans(db: Session):
-    return db.query(models.Loan).all()
+    """Obtener todos los préstamos"""
+    return db.query(Loan).all()
 
 def get_active_loans(db: Session):
-    return db.query(models.Loan).filter(models.Loan.status == "active").all()
+    """Obtener préstamos activos"""
+    return db.query(Loan).filter(Loan.status == "active").all()
 
 def create_loan(db: Session, loan: schemas.LoanCreate):
-    book = db.query(models.Book).filter(models.Book.book_id == loan.book_id).first()
+    """Crear un préstamo si el libro está disponible"""
+    book = db.query(Book).filter(Book.book_id == loan.book_id).first()
     if not book or book.status != "available":
-        return None  # Book not available
+        return None  # Libro no disponible
     
-    db_loan = models.Loan(
+    db_loan = Loan(
         book_id=loan.book_id,
         user_id=loan.user_id,
         loan_date=loan.loan_date or date.today(),
@@ -27,21 +32,26 @@ def create_loan(db: Session, loan: schemas.LoanCreate):
     return db_loan
 
 def return_loan(db: Session, loan_id: int):
-    loan = db.query(models.Loan).filter(models.Loan.loan_id == loan_id).first()
+    """Marcar préstamo como devuelto"""
+    loan = db.query(Loan).filter(Loan.loan_id == loan_id).first()
     if not loan or loan.status != "active":
         return None
+
     loan.status = "returned"
     loan.return_date = date.today()
 
-    book = db.query(models.Book).filter(models.Book.book_id == loan.book_id).first()
-    book.status = "available"
+    # Cambiar estado del libro a disponible
+    book = db.query(Book).filter(Book.book_id == loan.book_id).first()
+    if book:
+        book.status = "available"
 
     db.commit()
     db.refresh(loan)
     return loan
 
 def delete_loan(db: Session, loan_id: int):
-    loan = db.query(models.Loan).filter(models.Loan.loan_id == loan_id).first()
+    """Eliminar préstamo"""
+    loan = db.query(Loan).filter(Loan.loan_id == loan_id).first()
     if loan:
         db.delete(loan)
         db.commit()
