@@ -1,0 +1,22 @@
+# Entorno virtual
+venv/
+ENV/
+env/
+.venv/
+
+# Variables de entorno
+.env
+
+# Cachés de Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Archivos de compilación
+*.log
+*.sqlite3
+
+# Configuraciones locales
+.idea/
+.vscode/
