@@ -286,6 +286,16 @@ The video showcases:
 - Frontend integration and API usage
 - Dashboard statistics and book loan workflow
 
+Test Evidence
+Java Backend Tests (JUnit)
+
+./code/img/test1.jpg
+./code/img/test2.jpg
+
+Python Backend Tests (pytest)
+
+./code/img/test2.jpg
+
 ---
 
 ## 📚 References
