@@ -1,7 +1,11 @@
+I’ll now generate a polished, publication-ready README.md in English, formatted using Markdown (with LaTeX-like section styling via emoji titles and clear hierarchy). It will include your project structure, API documentation (organized by backend), and integrate the REST endpoints you provided.
+
 📚 BookWiseUD
 
-BookWiseUD is a smart library management system that simplifies catalog organization, book lending, and user tracking.
-Designed for schools, universities, and public libraries, it improves efficiency and access to knowledge through an intuitive web interface and robust backend integration.
+Smart Library Management System for Schools, Universities, and Public Libraries.
+
+BookWiseUD simplifies catalog organization, book lending, and user tracking.
+It combines two integrated backends — FastAPI (Python) and Spring Boot (Java) — connected to a modern React + TypeScript frontend.
 
 🧭 Table of Contents
 
@@ -11,75 +15,73 @@ Architecture
 
 Technologies Used
 
-Folder Structure
+Project Structure
 
-1️⃣ Python Backend Setup (Business Logic)
+Python Backend (Business Logic)
 
-2️⃣ Java Backend Setup (Authentication)
+Java Backend (Authentication)
 
-3️⃣ Frontend Setup (Web GUI)
+Frontend Setup
 
-4️⃣ REST API Overview
+REST API Reference
 
-5️⃣ Unit Testing
+Python Backend Endpoints
 
-6️⃣ Integration Evidence
+Java Backend Endpoints
 
-7️⃣ References
+Unit Testing
+
+Integration Evidence
+
+References
 
 🧩 Project Overview
 
-BookWiseUD connects two backend services (Python and Java) to a modern web frontend.
-
-Java Backend: Handles user authentication and access control (MySQL).
-
-Python Backend: Manages business logic and CRUD operations (PostgreSQL).
-
-Frontend (React + TypeScript): Provides a user-friendly interface for interacting with both APIs.
+BookWiseUD provides a complete digital solution for managing libraries.
+It allows librarians to manage books, categories, and users, while readers can borrow and return books online.
 
 🏗 Architecture
 Frontend (React + TypeScript)
         │
         ├── REST API ───► Python Backend (FastAPI + PostgreSQL)
+        │                      └── CRUD operations and business logic
         │
         └── REST API ───► Java Backend (Spring Boot + MySQL)
+                               └── Authentication and JWT management
 
-💻 Technologies Used
+🧰 Technologies Used
+Layer	Technology Stack
+Frontend	React, TypeScript, Vite
+Python Backend	FastAPI, SQLAlchemy, PostgreSQL, PyJWT, pytest
+Java Backend	Spring Boot, MySQL, JUnit
+Tools	pgAdmin, Maven, Visual Studio Code, Postman
+📁 Project Structure
+Workshop3
+├── backend-java/        # Java Spring Boot Authentication Backend 
+├── python-backend/      # Python FastAPI Business Logic Backend
+├── Frontend/            # Web GUI (React + TypeScript)
+├── utils/               # Database scripts and utilities
+└── README.md            # Project documentation
 
-Frontend: React, TypeScript, Vite, Node.js
-
-Python Backend: FastAPI, SQLAlchemy, PostgreSQL, JWT, pytest
-
-Java Backend: Spring Boot, MySQL, JUnit
-
-Tools: pgAdmin, Maven, Visual Studio Code, Postman
-
-📁 Folder Structure
-├── backend-java/ # Java Spring Boot Authentication Backend 
-├── python-backend/ # Python FastAPI Business Logic Backend
-├── Frontend/ # Web GUI
-├── utils/ # Database scripts and utilities
-└── README.md # This file
-
-1️⃣ Python Backend Setup (Business Logic)
+🐍 Python Backend (Business Logic)
 Requirements
 
 Python installed
 
-PostgreSQL with pgAdmin
+PostgreSQL and pgAdmin
 
-Database script: python-backend/utils/Script.sql
+Database script: utils/Script.sql
 
 Configuration
 
-File: .env
+Create a .env file inside python-backend:
 
 DATABASE_URL=postgresql://postgres:"YOUR_PASSWORD"@localhost:5432/library_db
 JWT_SECRET_KEY=MTkxNTYyMDIzMTE4NTUxNDc5MTQ1NTE4OTE0NzE5NTEzOTE0MTE4
 JWT_ALGORITHM=HS256
 
 
-Adjust the password and database port if needed.
+Adjust database password and port if needed.
 
 Run Instructions
 cd python-backend
@@ -92,26 +94,25 @@ uvicorn app.main:app --reload
 
 
 Access the API at:
-
-http://127.0.0.1:8000
+👉 http://127.0.0.1:8000
 
 CORS Configuration
 
-In main.py, adjust the allowed origins according to the frontend port:
+In main.py:
 
 allow_origins = [
     "http://localhost:5173",
     "http://127.0.0.1:5173"
 ]
 
-2️⃣ Java Backend Setup (Authentication)
+☕ Java Backend (Authentication)
 Requirements
 
-Java JDK 25
+Java 17+
 
-Maven 4.0.0
+Maven
 
-MySQL
+MySQL installed
 
 Configuration
 
@@ -123,28 +124,20 @@ spring.datasource.username=root
 spring.datasource.password=1522
 spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQLDialect
 
-
-Adjust your password and port if necessary.
-
 Run Instructions
 cd backend-java
 mvn spring-boot:run
 
 
-Access the health endpoint:
+Access the API health check:
+👉 http://localhost:8080/health
 
-http://localhost:8080/health
+If using VS Code, install the Spring Boot Extension Pack for simplified execution.
 
-CORS Configuration
-
-In src/main/config/CorsConfig, modify the allowed origin depending on your frontend port.
-
-Alternatively, if using Visual Studio Code, you can run the project easily with the Spring Boot Extension Pack.
-
-3️⃣ Frontend Setup (Web GUI)
+💻 Frontend Setup
 Requirements
 
-Node.js (v18+)
+Node.js v18+
 
 NPM or Yarn
 
@@ -154,80 +147,109 @@ npm install
 npm run dev
 
 
-Access the interface:
+Access at:
+👉 http://localhost:5173
 
-http://localhost:5173
+🌐 REST API Reference
+⚙️ Python Backend Endpoints (FastAPI + PostgreSQL)
+Users (/users)
+Method	Endpoint	Description	Access
+GET	/users/	Get all users	Librarian
+GET	/users/{user_id}	Get specific user	Librarian
+POST	/users/	Create new user	Librarian
+PUT	/users/{user_id}	Update user info	Librarian
+DELETE	/users/{user_id}	Delete user	Librarian
+Books (/books)
+Method	Endpoint	Description
+GET	/books/	Get all books
+GET	/books/available	Get available books
+GET	/books/search?search=term	Search books
+POST	/books/	Create a new book
+PUT	/books/{book_id}	Update book
+DELETE	/books/{book_id}	Delete book
+Loans (/loans)
+Method	Endpoint	Description	Access
+GET	/loans/	Get all loans	Librarian
+GET	/loans/me	Get my loans	Authenticated users
+GET	/loans/active	Get active loans	Librarian
+POST	/loans/	Create new loan	Librarian
+PUT	/loans/return/{loan_id}	Mark loan as returned	Librarian
+GET	/loans/{loan_id}	Get specific loan	User or Librarian
+DELETE	/loans/{loan_id}	Delete loan	Librarian
+Categories (/categories)
+Method	Endpoint	Description
+GET	/categories/	Retrieve all categories
+Statistics (/stats)
+Method	Endpoint	Description
+GET	/stats/dashboard	Dashboard statistics (books, users, loans)
+🔐 Java Backend Endpoints (Spring Boot + MySQL)
+Authentication (/auth)
+Method	Endpoint	Description
+POST	/auth/login	User login with credentials
+POST	/auth/register	Register a new user
 
-4️⃣ REST API Overview
+Sample JSON – Login
 
-Both backends expose RESTful APIs that enable full integration with the frontend.
+{
+  "username": "librarian1",
+  "password": "password123"
+}
 
-Python Backend (FastAPI + PostgreSQL)
 
-Handles library operations such as:
+Sample Response
 
-Books Management (CRUD)
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5..."
+}
 
-Loans and Returns
+🧪 Unit Testing
 
-User Roles and Permissions
+Automated tests ensure data integrity and functionality across both backends.
 
-Java Backend (Spring Boot + MySQL)
-
-Manages:
-
-Authentication and Authorization
-
-User Registration and Login
-
-JWT Token Generation and Validation
-
-Each API includes appropriate HTTP methods (GET, POST, PUT, DELETE) and JSON responses.
-
-5️⃣ Unit Testing
-
-BookWiseUD includes automated testing to ensure backend reliability and data consistency.
-
-Python Backend Tests
+Python Backend
 
 Framework: pytest
 
-Location: python-backend/test
-
-To run tests:
+Directory: python-backend/app/test
 
 pytest
 
-Java Backend Tests
+Java Backend
 
 Framework: JUnit
 
-Location: backend-java/src/test
-
-To run tests:
+Directory: backend-java/src/test
 
 mvn test
 
-6️⃣ Integration Evidence
+🎥 Integration Evidence
 
-A demonstration video showcasing system functionality and frontend-backend communication is available here:
+A full demonstration video of the system’s integration and functionality is available at:
+👉 https://youtu.be/9yBXenUdeNg
 
-🎥 Demo Video: https://youtu.be/9yBXenUdeNg
+The video showcases:
 
-7️⃣ References
+Backend communication (FastAPI ↔ Spring Boot)
 
-FastAPI Documentation — https://fastapi.tiangolo.com
+Frontend integration and API usage
 
-Spring Boot Reference — https://spring.io/projects/spring-boot
+Dashboard statistics and book loan workflow
 
-PostgreSQL & MySQL Docs
+📚 References
 
-React + TypeScript — https://react.dev
+FastAPI Documentation
 
-🧑‍💻 Author
+Spring Boot Reference
 
-Developed by BookWiseUD Team:
+PostgreSQL Documentation
+
+React + TypeScript Docs
+
+👩‍💻 Developed by
+
+BookWiseUD Team:
 Wilder Steven Hernandez Manosalva - 20212020135
 Jhon Javier Castañeda Alvarado - 20211020100
+Software Engineering Seminar — Workshop No. 3
 Universidad Distrital Francisco José de Caldas
 November 2025
