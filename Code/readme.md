@@ -289,12 +289,12 @@ The video showcases:
 Test Evidence
 Java Backend Tests (JUnit)
 
-./code/img/test1.jpg
-./code/img/test2.jpg
+![Java Test 1](./img/test1.jpg)
+![Java Test 2](./img/test2.jpg)
 
 Python Backend Tests (pytest)
 
-./code/img/test2.jpg
+![Python Test](./img/test3.jpg)
 
 ---
 
