@@ -76,7 +76,7 @@ Workshop3
 
 - Python installed
 - PostgreSQL and pgAdmin
-- Database script: `utils/Script.sql`
+- Database script: `utils/ScriptLibrary-posgresql.sql`
 
 ### Configuration
 
@@ -122,9 +122,10 @@ allow_origins = [
 
 ### Requirements
 
-- Java 17+
-- Maven
+- Java 25
+- Maven 4.0.0
 - MySQL installed
+- Database script: `utils/ScriptSecurity-mysql.sql`
 
 ### Configuration
 
