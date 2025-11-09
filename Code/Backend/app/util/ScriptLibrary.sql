@@ -1,3 +1,5 @@
+CREATE DATABASE library_db;
+
 -- TABLE: Category
 CREATE TABLE category (
   category_id SERIAL PRIMARY KEY,
