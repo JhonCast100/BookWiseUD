@@ -1,0 +1,28 @@
+# requirements-test.txt
+# Dependencias para testing
+
+# Framework de testing
+pytest==7.4.3
+pytest-cov==4.1.0
+pytest-asyncio==0.21.1
+pytest-mock==3.12.0
+
+# Testing de FastAPI
+httpx==0.25.2
+requests==2.31.0
+
+# Base de datos para tests
+SQLAlchemy==2.0.23
+
+# Utilidades
+faker==20.1.0
+freezegun==1.4.0
+
+# Análisis de código
+flake8==6.1.0
+black==23.12.1
+mypy==1.7.1
+isort==5.13.2
+
+# Cobertura
+coverage[toml]==7.3.4
