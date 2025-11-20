@@ -22,7 +22,6 @@ def create_loan(db: Session, loan: schemas.LoanCreate):
         book_id=loan.book_id,
         user_id=loan.user_id,
         loan_date=loan.loan_date or date.today(),
-        return_date=loan.return_date,
         status="active"
     )
     db.add(db_loan)

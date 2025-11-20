@@ -62,13 +62,15 @@ class TestBookCRUD:
         updated = crud_books.update_book(db_session, sample_book.book_id, update_data)
         assert updated.title == "Updated Title"
     
-    def test_update_nonexistent_book(self, db_session):
+    def test_update_nonexistent_book(self, db_session, sample_category):
         """Debe retornar None al actualizar libro inexistente"""
         update_data = BookCreate(
             title="Test",
             author="Test",
+            publication_year=2024,
             isbn="123",
-            category_id=1
+            status="available",
+            category_id=sample_category.category_id
         )
         
         result = crud_books.update_book(db_session, 9999, update_data)
@@ -137,7 +139,7 @@ class TestBookEndpoints:
         data = response.json()
         assert len(data) == 1
     
-    def test_create_book_endpoint(self, client, sample_category):
+    def test_create_book_endpoint(self, client, db_session, sample_category):
         """POST /books/ debe crear un libro"""
         book_data = {
             "title": "Test Book",
@@ -170,13 +172,15 @@ class TestBookEndpoints:
         data = response.json()
         assert data["title"] == "Updated Book"
     
-    def test_update_nonexistent_book_endpoint(self, client):
+    def test_update_nonexistent_book_endpoint(self, client, sample_category):
         """PUT /books/{id} debe retornar 404 para libro inexistente"""
         update_data = {
             "title": "Test",
             "author": "Test",
+            "publication_year": 2024,
             "isbn": "123",
-            "category_id": 1
+            "status": "available",
+            "category_id": sample_category.category_id
         }
         
         response = client.put("/books/9999", json=update_data)

@@ -1,61 +1,151 @@
 # tests/test_utils.py
 import pytest
+import jwt
+from datetime import datetime, timedelta
 from fastapi import HTTPException
-from app import utils
+from app import auth_utils
+import base64
 
-# 🔹 decode_jwt
-def test_decode_jwt_valid(monkeypatch):
-    monkeypatch.setattr(utils.jwt, "decode", lambda token, key, algorithms: {"username": "test"})
-    payload = utils.decode_jwt("valid_token")
-    assert payload["username"] == "test"
+SECRET_KEY = "MTkxNTYyMDIzMTE4NTUxNDc5MTQ1NTE4OTE0NzE5NTEzOTE0MTE4"
+ALGORITHM = "HS256"
+DECODED_KEY = base64.b64decode(SECRET_KEY)
 
-def test_decode_jwt_expired(monkeypatch):
-    monkeypatch.setattr(utils.jwt, "decode", lambda token, key, algorithms: {"username": "test", "exp": 0})
-    with pytest.raises(HTTPException):
-        utils.decode_jwt("expired_token")
 
-def test_decode_jwt_invalid(monkeypatch):
-    def raise_invalid(*args, **kwargs):
-        raise utils.jwt.InvalidTokenError()
-    monkeypatch.setattr(utils.jwt, "decode", raise_invalid)
-    with pytest.raises(HTTPException):
-        utils.decode_jwt("invalid_token")
+def test_decode_jwt_valid():
+    """Debe decodificar un token JWT válido"""
+    payload = {
+        "username": "test@example.com",
+        "id": 1,
+        "rol": "USER",
+        "exp": datetime.utcnow() + timedelta(hours=1)
+    }
+    token = jwt.encode(payload, DECODED_KEY, algorithm=ALGORITHM)
+    
+    decoded = auth_utils.decode_jwt(token)
+    assert decoded["username"] == "test@example.com"
 
-# 🔹 get_current_user
-def test_get_current_user_existing(monkeypatch):
-    class DummyUser:
-        role = "user"
-    monkeypatch.setattr(utils, "get_user_by_username", lambda x: DummyUser())
-    user = utils.get_current_user("dummy_token")
-    assert user.role == "user"
 
-def test_get_current_user_auto_create(monkeypatch):
-    class DummyUser:
-        role = "user"
-    monkeypatch.setattr(utils, "get_user_by_username", lambda x: None)
-    monkeypatch.setattr(utils, "create_user", lambda x: DummyUser())
-    user = utils.get_current_user("dummy_token")
-    assert user.role == "user"
+def test_decode_jwt_expired():
+    """Debe lanzar HTTPException para token expirado"""
+    payload = {
+        "username": "test@example.com",
+        "id": 1,
+        "rol": "USER",
+        "exp": datetime.utcnow() - timedelta(hours=1)  # Token expirado
+    }
+    token = jwt.encode(payload, DECODED_KEY, algorithm=ALGORITHM)
+    
+    with pytest.raises(HTTPException) as exc_info:
+        auth_utils.decode_jwt(token)
+    assert exc_info.value.status_code == 401
 
-# 🔹 get_current_librarian
-def test_get_current_librarian_admin():
-    class DummyAdmin:
-        role = "admin"
-    assert utils.get_current_librarian(DummyAdmin()).role == "admin"
 
-def test_get_current_librarian_forbidden():
-    class DummyUser:
-        role = "user"
-    with pytest.raises(HTTPException):
-        utils.get_current_librarian(DummyUser())
+def test_decode_jwt_invalid():
+    """Debe lanzar HTTPException para token inválido"""
+    with pytest.raises(HTTPException) as exc_info:
+        auth_utils.decode_jwt("invalid_token_string")
+    assert exc_info.value.status_code == 401
 
-# 🔹 optional_auth
-def test_optional_auth_with_token(monkeypatch):
-    class DummyUser:
-        role = "user"
-    monkeypatch.setattr(utils, "get_current_user", lambda x: DummyUser())
-    user = utils.optional_auth("dummy_token")
-    assert user.role == "user"
 
-def test_optional_auth_without_token():
-    assert utils.optional_auth(None) is None
+def test_get_current_user_existing(db_session, sample_user):
+    """Debe obtener usuario existente del token"""
+    from fastapi.security import HTTPAuthorizationCredentials
+    
+    # Crear token para usuario existente
+    payload = {
+        "username": sample_user.email,
+        "id": sample_user.auth_id,
+        "rol": "USER",
+        "exp": datetime.utcnow() + timedelta(hours=1)
+    }
+    token = jwt.encode(payload, DECODED_KEY, algorithm=ALGORITHM)
+    
+    credentials = HTTPAuthorizationCredentials(scheme="Bearer", credentials=token)
+    user = auth_utils.get_current_user(credentials, db_session)
+    
+    assert user is not None
+    assert user.email == sample_user.email
+
+
+def test_get_current_user_auto_create(db_session):
+    """Debe crear usuario automáticamente si no existe"""
+    from fastapi.security import HTTPAuthorizationCredentials
+    
+    # Crear token para usuario nuevo
+    payload = {
+        "username": "newuser@example.com",
+        "id": 999,
+        "rol": "USER",
+        "exp": datetime.utcnow() + timedelta(hours=1)
+    }
+    token = jwt.encode(payload, DECODED_KEY, algorithm=ALGORITHM)
+    
+    credentials = HTTPAuthorizationCredentials(scheme="Bearer", credentials=token)
+    user = auth_utils.get_current_user(credentials, db_session)
+    
+    assert user is not None
+    assert user.email == "newuser@example.com"
+    assert user.status == "active"
+
+
+def test_get_current_librarian_admin(db_session, admin_user):
+    """Debe permitir acceso a usuario con rol ADMIN"""
+    from fastapi.security import HTTPAuthorizationCredentials
+    
+    payload = {
+        "username": admin_user.email,
+        "id": admin_user.auth_id,
+        "rol": "ADMIN",
+        "exp": datetime.utcnow() + timedelta(hours=1)
+    }
+    token = jwt.encode(payload, DECODED_KEY, algorithm=ALGORITHM)
+    
+    credentials = HTTPAuthorizationCredentials(scheme="Bearer", credentials=token)
+    user = auth_utils.get_current_librarian(credentials, db_session)
+    
+    assert user is not None
+    assert user.email == admin_user.email
+
+
+def test_get_current_librarian_forbidden(db_session, sample_user):
+    """Debe denegar acceso a usuario sin rol ADMIN"""
+    from fastapi.security import HTTPAuthorizationCredentials
+    
+    payload = {
+        "username": sample_user.email,
+        "id": sample_user.auth_id,
+        "rol": "USER",
+        "exp": datetime.utcnow() + timedelta(hours=1)
+    }
+    token = jwt.encode(payload, DECODED_KEY, algorithm=ALGORITHM)
+    
+    credentials = HTTPAuthorizationCredentials(scheme="Bearer", credentials=token)
+    
+    with pytest.raises(HTTPException) as exc_info:
+        auth_utils.get_current_librarian(credentials, db_session)
+    assert exc_info.value.status_code == 403
+
+
+def test_optional_auth_with_token(db_session, sample_user):
+    """Debe retornar usuario cuando hay token"""
+    from fastapi.security import HTTPAuthorizationCredentials
+    
+    payload = {
+        "username": sample_user.email,
+        "id": sample_user.auth_id,
+        "rol": "USER",
+        "exp": datetime.utcnow() + timedelta(hours=1)
+    }
+    token = jwt.encode(payload, DECODED_KEY, algorithm=ALGORITHM)
+    
+    credentials = HTTPAuthorizationCredentials(scheme="Bearer", credentials=token)
+    user = auth_utils.optional_auth(credentials, db_session)
+    
+    assert user is not None
+    assert user.email == sample_user.email
+
+
+def test_optional_auth_without_token(db_session):
+    """Debe retornar None cuando no hay token"""
+    user = auth_utils.optional_auth(None, db_session)
+    assert user is None

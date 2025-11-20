@@ -136,8 +136,11 @@ class TestUserCRUD:
     def test_update_nonexistent_user(self, db_session):
         """Debe retornar None al actualizar usuario inexistente"""
         update_data = UserCreate(
+            auth_id=999,
             full_name="Test",
-            email="test@test.com"
+            email="test@test.com",
+            phone="1234567890",
+            status="active"
         )
         
         result = crud_users.update_user(db_session, 9999, update_data)
@@ -162,23 +165,8 @@ class TestUserEndpoints:
         response = client.get("/users/", headers=headers)
         assert response.status_code == 403
     
-    def test_get_users_with_admin(self, client, admin_headers, sample_user):
+    def test_get_users_with_admin(self, client, admin_headers, sample_user, admin_user):
         """GET /users/ debe funcionar con admin"""
-        # Primero crear el usuario admin en la DB
-        from app.models.user import User
-        from app.database import SessionLocal
-        
-        db = SessionLocal()
-        admin = User(
-            auth_id=999,
-            full_name="Admin User",
-            email="admin@library.com",
-            status="active"
-        )
-        db.add(admin)
-        db.commit()
-        db.close()
-        
         response = client.get("/users/", headers=admin_headers)
         assert response.status_code == 200
         data = response.json()
@@ -190,22 +178,8 @@ class TestUserEndpoints:
         response = client.get(f"/users/{sample_user.user_id}", headers=headers)
         assert response.status_code == 403
     
-    def test_get_user_by_id_not_found(self, client, admin_headers):
+    def test_get_user_by_id_not_found(self, client, admin_headers, admin_user):
         """GET /users/{id} debe retornar 404 si no existe"""
-        from app.models.user import User
-        from app.database import SessionLocal
-        
-        db = SessionLocal()
-        admin = User(
-            auth_id=999,
-            full_name="Admin User",
-            email="admin@library.com",
-            status="active"
-        )
-        db.add(admin)
-        db.commit()
-        db.close()
-        
         response = client.get("/users/9999", headers=admin_headers)
         assert response.status_code == 404
     
@@ -213,29 +187,18 @@ class TestUserEndpoints:
         """POST /users/ debe requerir rol de admin"""
         headers = {"Authorization": f"Bearer {user_token}"}
         user_data = {
+            "auth_id": 5,
             "full_name": "New User",
-            "email": "new@library.com"
+            "email": "new@library.com",
+            "phone": "5555555555",
+            "status": "active"
         }
         
         response = client.post("/users/", json=user_data, headers=headers)
         assert response.status_code == 403
     
-    def test_create_user_with_admin(self, client, admin_headers):
+    def test_create_user_with_admin(self, client, admin_headers, admin_user):
         """POST /users/ debe funcionar con admin"""
-        from app.models.user import User
-        from app.database import SessionLocal
-        
-        db = SessionLocal()
-        admin = User(
-            auth_id=999,
-            full_name="Admin User",
-            email="admin@library.com",
-            status="active"
-        )
-        db.add(admin)
-        db.commit()
-        db.close()
-        
         user_data = {
             "auth_id": 5,
             "full_name": "New User",
@@ -253,8 +216,11 @@ class TestUserEndpoints:
         """PUT /users/{id} debe requerir rol de admin"""
         headers = {"Authorization": f"Bearer {user_token}"}
         user_data = {
+            "auth_id": sample_user.auth_id,
             "full_name": "Updated",
-            "email": sample_user.email
+            "email": sample_user.email,
+            "phone": "1234567890",
+            "status": "active"
         }
         
         response = client.put(

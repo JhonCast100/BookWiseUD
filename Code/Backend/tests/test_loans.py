@@ -20,23 +20,49 @@ class TestLoanCRUD:
         assert len(active_loans) == 1
         assert active_loans[0].status == "active"
     
-    def test_create_loan_with_available_book(self, db_session, sample_book, sample_user):
+    def test_create_loan_with_available_book(self, db_session, sample_category):
         """Debe crear préstamo cuando el libro está disponible"""
+        from app.models.book import Book
+        from app.models.user import User
+        
+        # Crear libro disponible
+        book = Book(
+            title="Available Book",
+            author="Author",
+            isbn="ISBN-123",
+            status="available",
+            category_id=sample_category.category_id
+        )
+        db_session.add(book)
+        
+        # Crear usuario
+        user = User(
+            auth_id=10,
+            full_name="Test User",
+            email="testuser@library.com",
+            status="active"
+        )
+        db_session.add(user)
+        db_session.commit()
+        db_session.refresh(book)
+        db_session.refresh(user)
+        
+        # Crear préstamo
         loan_data = LoanCreate(
-            book_id=sample_book.book_id,
-            user_id=sample_user.user_id,
+            book_id=book.book_id,
+            user_id=user.user_id,
             loan_date=date.today()
         )
         
         loan = crud_loans.create_loan(db_session, loan_data)
         assert loan is not None
         assert loan.status == "active"
-        assert loan.book_id == sample_book.book_id
-        assert loan.user_id == sample_user.user_id
+        assert loan.book_id == book.book_id
+        assert loan.user_id == user.user_id
         
         # Verificar que el libro cambió a estado "loaned"
-        db_session.refresh(sample_book)
-        assert sample_book.status == "loaned"
+        db_session.refresh(book)
+        assert book.status == "loaned"
     
     def test_create_loan_with_unavailable_book(self, db_session, sample_book, sample_user):
         """Debe fallar al crear préstamo si el libro no está disponible"""
@@ -109,22 +135,8 @@ class TestLoanEndpoints:
         response = client.get("/loans/", headers=headers)
         assert response.status_code == 403
     
-    def test_get_all_loans_with_admin(self, client, sample_loan, admin_headers):
+    def test_get_all_loans_with_admin(self, client, sample_loan, admin_headers, admin_user):
         """GET /loans/ debe funcionar con admin"""
-        from app.models.user import User
-        from app.database import SessionLocal
-        
-        db = SessionLocal()
-        admin = User(
-            auth_id=999,
-            full_name="Admin User",
-            email="admin@library.com",
-            status="active"
-        )
-        db.add(admin)
-        db.commit()
-        db.close()
-        
         response = client.get("/loans/", headers=admin_headers)
         assert response.status_code == 200
         data = response.json()
@@ -148,22 +160,8 @@ class TestLoanEndpoints:
         response = client.get("/loans/active", headers=headers)
         assert response.status_code == 403
     
-    def test_get_active_loans_with_admin(self, client, sample_loan, admin_headers):
+    def test_get_active_loans_with_admin(self, client, sample_loan, admin_headers, admin_user):
         """GET /loans/active debe funcionar con admin"""
-        from app.models.user import User
-        from app.database import SessionLocal
-        
-        db = SessionLocal()
-        admin = User(
-            auth_id=999,
-            full_name="Admin User",
-            email="admin@library.com",
-            status="active"
-        )
-        db.add(admin)
-        db.commit()
-        db.close()
-        
         response = client.get("/loans/active", headers=admin_headers)
         assert response.status_code == 200
         data = response.json()
@@ -181,51 +179,49 @@ class TestLoanEndpoints:
         response = client.post("/loans/", json=loan_data, headers=headers)
         assert response.status_code == 403
     
-    def test_create_loan_with_admin(self, client, sample_book, sample_user, admin_headers):
+    def test_create_loan_with_admin(self, client, db_session, sample_category, admin_headers, admin_user):
         """POST /loans/ debe funcionar con admin"""
+        from app.models.book import Book
         from app.models.user import User
-        from app.database import SessionLocal
         
-        db = SessionLocal()
-        admin = User(
-            auth_id=999,
-            full_name="Admin User",
-            email="admin@library.com",
+        # Crear libro directamente en db_session
+        book = Book(
+            title="Loan Test Book",
+            author="Test Author",
+            isbn="ISBN-TEST",
+            status="available",
+            category_id=sample_category.category_id
+        )
+        db_session.add(book)
+        
+        # Crear usuario directamente en db_session
+        user = User(
+            auth_id=50,
+            full_name="Loan Test User",
+            email="loantest@library.com",
             status="active"
         )
-        db.add(admin)
-        db.commit()
-        db.close()
+        db_session.add(user)
+        db_session.commit()
+        db_session.refresh(book)
+        db_session.refresh(user)
         
+        # Crear préstamo
         loan_data = {
-            "book_id": sample_book.book_id,
-            "user_id": sample_user.user_id,
+            "book_id": book.book_id,
+            "user_id": user.user_id,
             "loan_date": str(date.today())
         }
         
         response = client.post("/loans/", json=loan_data, headers=admin_headers)
         assert response.status_code == 200
         data = response.json()
-        assert data["book_id"] == sample_book.book_id
-        assert data["user_id"] == sample_user.user_id
+        assert data["book_id"] == book.book_id
+        assert data["user_id"] == user.user_id
         assert data["status"] == "active"
     
-    def test_create_loan_user_not_found(self, client, sample_book, admin_headers):
+    def test_create_loan_user_not_found(self, client, sample_book, admin_headers, admin_user):
         """POST /loans/ debe retornar 404 si usuario no existe"""
-        from app.models.user import User
-        from app.database import SessionLocal
-        
-        db = SessionLocal()
-        admin = User(
-            auth_id=999,
-            full_name="Admin User",
-            email="admin@library.com",
-            status="active"
-        )
-        db.add(admin)
-        db.commit()
-        db.close()
-        
         loan_data = {
             "book_id": sample_book.book_id,
             "user_id": 9999,
@@ -235,22 +231,8 @@ class TestLoanEndpoints:
         response = client.post("/loans/", json=loan_data, headers=admin_headers)
         assert response.status_code == 404
     
-    def test_create_loan_book_not_found(self, client, sample_user, admin_headers):
+    def test_create_loan_book_not_found(self, client, sample_user, admin_headers, admin_user):
         """POST /loans/ debe retornar 404 si libro no existe"""
-        from app.models.user import User
-        from app.database import SessionLocal
-        
-        db = SessionLocal()
-        admin = User(
-            auth_id=999,
-            full_name="Admin User",
-            email="admin@library.com",
-            status="active"
-        )
-        db.add(admin)
-        db.commit()
-        db.close()
-        
         loan_data = {
             "book_id": 9999,
             "user_id": sample_user.user_id,
@@ -260,22 +242,8 @@ class TestLoanEndpoints:
         response = client.post("/loans/", json=loan_data, headers=admin_headers)
         assert response.status_code == 404
     
-    def test_create_loan_book_not_available(self, client, sample_loan, admin_headers):
+    def test_create_loan_book_not_available(self, client, sample_loan, admin_headers, admin_user):
         """POST /loans/ debe retornar 400 si libro no está disponible"""
-        from app.models.user import User
-        from app.database import SessionLocal
-        
-        db = SessionLocal()
-        admin = User(
-            auth_id=999,
-            full_name="Admin User",
-            email="admin@library.com",
-            status="active"
-        )
-        db.add(admin)
-        db.commit()
-        db.close()
-        
         loan_data = {
             "book_id": sample_loan.book_id,
             "user_id": sample_loan.user_id,
@@ -291,44 +259,16 @@ class TestLoanEndpoints:
         response = client.put(f"/loans/return/{sample_loan.loan_id}", headers=headers)
         assert response.status_code == 403
     
-    def test_return_loan_with_admin(self, client, sample_loan, admin_headers):
+    def test_return_loan_with_admin(self, client, sample_loan, admin_headers, admin_user):
         """PUT /loans/return/{id} debe funcionar con admin"""
-        from app.models.user import User
-        from app.database import SessionLocal
-        
-        db = SessionLocal()
-        admin = User(
-            auth_id=999,
-            full_name="Admin User",
-            email="admin@library.com",
-            status="active"
-        )
-        db.add(admin)
-        db.commit()
-        db.close()
-        
         response = client.put(f"/loans/return/{sample_loan.loan_id}", headers=admin_headers)
         assert response.status_code == 200
         data = response.json()
         assert data["status"] == "returned"
         assert data["return_date"] is not None
     
-    def test_return_loan_not_found(self, client, admin_headers):
+    def test_return_loan_not_found(self, client, admin_headers, admin_user):
         """PUT /loans/return/{id} debe retornar 404 si préstamo no existe"""
-        from app.models.user import User
-        from app.database import SessionLocal
-        
-        db = SessionLocal()
-        admin = User(
-            auth_id=999,
-            full_name="Admin User",
-            email="admin@library.com",
-            status="active"
-        )
-        db.add(admin)
-        db.commit()
-        db.close()
-        
         response = client.put("/loans/return/9999", headers=admin_headers)
         assert response.status_code == 404
     
