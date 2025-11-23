@@ -149,11 +149,8 @@ class TestUserCRUD:
     def test_delete_user(self, db_session, sample_user):
         """Debe eliminar un usuario"""
         deleted = crud_users.delete_user(db_session, sample_user.user_id)
-        assert deleted is not None
+        assert deleted.status == "inactive"
         
-        # Verificar que fue eliminado
-        user = crud_users.get_user_by_id(db_session, sample_user.user_id)
-        assert user is None
 
 
 class TestUserEndpoints:
