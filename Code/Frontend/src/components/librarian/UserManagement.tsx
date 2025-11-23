@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { apiService, ApiUser } from '../../services/api';
 import { Users, Plus, Search, CreditCard as Edit2, Trash2, X, Mail, Phone } from 'lucide-react';
+import Alert, { AlertType } from '../layout/Alert';
 import axios from 'axios';
 import {jwtDecode} from 'jwt-decode';
 
@@ -23,7 +24,8 @@ export default function UserManagement() {
     role: 'USER'
   });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [alert, setAlert] = useState<{ type: AlertType; title?: string; message: string } | null>(null);
+  const [confirmUserId, setConfirmUserId] = useState<number | null>(null);
 
   // Cliente para Spring Boot Auth
   const authClient = axios.create({
@@ -38,11 +40,11 @@ export default function UserManagement() {
   const loadUsers = async () => {
     try {
       setLoading(true);
-      setError(null);
+      setAlert(null);
       const data = await apiService.getUsers();
       setUsers(data);
     } catch (err) {
-      setError('Error loading users');
+      setAlert({ type: 'error', message: 'Error loading users' });
       console.error(err);
     } finally {
       setLoading(false);
@@ -57,7 +59,7 @@ export default function UserManagement() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
+    setAlert(null);
     setLoading(true);
 
     try {
@@ -66,7 +68,7 @@ export default function UserManagement() {
       // Si es nuevo usuario, crear en Spring Boot (MySQL)
       if (!editingUser) {
         if (!formData.password) {
-          setError('Password is required for new users');
+          setAlert({ type: 'error', message: 'Password is required for new users' });
           setLoading(false);
           return;
         }
@@ -97,34 +99,24 @@ export default function UserManagement() {
 
       if (editingUser && editingUser.user_id) {
         await apiService.updateUser(editingUser.user_id, userData);
+        setAlert({ type: 'success', message: 'User updated successfully' });
       } else {
         await apiService.createUser(userData);
+        setAlert({ type: 'success', message: 'User created successfully' });
       }
 
       await loadUsers();
       closeModal();
     } catch (err: any) {
       console.error(err);
-      setError(err.response?.data?.message || err.message || 'Error saving user');
+      setAlert({ type: 'error', message: err.response?.data?.message || err.message || 'Error saving user' });
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (confirm('Are you sure you want to delete this user?')) {
-      try {
-        setLoading(true);
-        setError(null);
-        await apiService.deleteUser(id);
-        await loadUsers();
-      } catch (err) {
-        setError('Error deleting user');
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    }
+  const handleDelete = (id: number) => {
+    setConfirmUserId(id);
   };
 
   const openModal = (user?: ApiUser) => {
@@ -153,7 +145,7 @@ export default function UserManagement() {
   const closeModal = () => {
     setIsModalOpen(false);
     setEditingUser(null);
-    setError(null);
+    setAlert(null);
   };
 
   const getStatusColor = (status?: string) => {
@@ -193,11 +185,40 @@ export default function UserManagement() {
         />
       </div>
 
-      {/* Error */}
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-          {error}
-        </div>
+      {/* Alerts */}
+      {alert && (
+        <Alert
+          type={alert.type}
+          title={alert.type === 'error' ? 'Error' : undefined}
+          message={alert.message}
+          onClose={() => setAlert(null)}
+          autoClose={true}
+        />
+      )}
+
+      {confirmUserId !== null && (
+        <Alert
+          type="info"
+          message={'Are you sure you want to deactivate this user?'}
+          onConfirm={async () => {
+            const id = confirmUserId;
+            try {
+              setLoading(true);
+              setAlert(null);
+              await apiService.deleteUser(id!);
+              await loadUsers();
+              setAlert({ type: 'success', message: 'User deactivated successfully' });
+            } catch (err) {
+              setAlert({ type: 'error', message: 'Error deactivating user' });
+              console.error(err);
+            } finally {
+              setLoading(false);
+              setConfirmUserId(null);
+            }
+          }}
+          onClose={() => setConfirmUserId(null)}
+          showCancel={true}
+        />
       )}
 
       {/* Loading */}

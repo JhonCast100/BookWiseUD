@@ -67,6 +67,8 @@ def delete_user(db: Session, user_id: int):
     """Eliminar usuario"""
     user = get_user_by_id(db, user_id)
     if user:
-        db.delete(user)
+        # Soft-delete: marcar como inactivo en lugar de borrar
+        user.status = "inactive"
         db.commit()
+        db.refresh(user)
     return user

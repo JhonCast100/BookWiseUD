@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { apiService } from '../../services/api';
 import { BookOpen, Users, BookMarked, CheckCircle } from 'lucide-react';
+import Alert, { AlertType } from '../layout/Alert';
 
 interface DashboardStats {
   total_books: number;
@@ -20,7 +21,7 @@ export default function Dashboard() {
     available_books: 0
   });
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [alert, setAlert] = useState<{ type: AlertType; title?: string; message: string } | null>(null);
 
   useEffect(() => {
     loadStats();
@@ -29,7 +30,7 @@ export default function Dashboard() {
   const loadStats = async () => {
     try {
       setLoading(true);
-      setError(null);
+      setAlert(null);
 
       const isLibrarian = userProfile?.role === 'librarian';
 
@@ -62,9 +63,9 @@ export default function Dashboard() {
         active_loans: loans.filter((l: any) => l.status === 'active').length,
         available_books: books.filter((b: any) => b.status === 'available').length
       });
-    } catch (err: any) {
+      } catch (err: any) {
       console.error('Dashboard error:', err);
-      setError(err.response?.data?.detail || 'Error loading dashboard data');
+      setAlert({ type: 'error', message: err.response?.data?.detail || 'Error loading dashboard data' });
     } finally {
       setLoading(false);
     }
@@ -125,15 +126,12 @@ export default function Dashboard() {
       </div>
     );
   }
-
-  if (error) {
+  if (alert) {
     return (
       <div className="space-y-4">
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-          {error}
-        </div>
+        <Alert type={alert.type} message={alert.message} onClose={() => setAlert(null)} autoClose={true} />
         <button
-          onClick={loadStats}
+          onClick={() => { setAlert(null); loadStats(); }}
           className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-lg"
         >
           Retry

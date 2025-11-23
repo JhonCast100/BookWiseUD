@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { apiService, ApiLoan, ApiBook, ApiUser } from '../../services/api';
 import { BookMarked, Plus, Search, X, CheckCircle, AlertCircle, Calendar } from 'lucide-react';
+import Alert, { AlertType } from '../layout/Alert';
 
 export default function LoanManagement() {
   const [loans, setLoans] = useState<ApiLoan[]>([]);
@@ -15,7 +16,8 @@ export default function LoanManagement() {
     loan_date: new Date().toISOString().split('T')[0],
   });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [alert, setAlert] = useState<{ type: AlertType; title?: string; message: string } | null>(null);
+  const [confirmReturnId, setConfirmReturnId] = useState<number | null>(null);
 
   useEffect(() => {
     loadData();
@@ -24,7 +26,7 @@ export default function LoanManagement() {
   const loadData = async () => {
     try {
       setLoading(true);
-      setError(null);
+      setAlert(null);
       const [loansData, booksData, usersData] = await Promise.all([
         apiService.getAllLoans(),
         apiService.getBooks(),
@@ -34,19 +36,19 @@ export default function LoanManagement() {
       setBooks(booksData);
       setUsers(usersData);
     } catch (err) {
-      setError('Error loading data');
+      setAlert({ type: 'error', message: 'Error loading data' });
       console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  const getBookTitle = (bookId: number) => {
+  const getBookTitle = (bookId?: number) => {
     const book = books.find(b => b.book_id === bookId);
     return book ? book.title : 'Book not found';
   };
 
-  const getUserName = (userId: number) => {
+  const getUserName = (userId?: number) => {
     const user = users.find(u => u.user_id === userId);
     return user ? user.full_name : 'User not found';
   };
@@ -65,13 +67,13 @@ export default function LoanManagement() {
     e.preventDefault();
 
     if (!formData.book_id || !formData.user_id) {
-      setError('Please select both book and user');
+      setAlert({ type: 'error', message: 'Please select both book and user' });
       return;
     }
 
     try {
       setLoading(true);
-      setError(null);
+      setAlert(null);
 
       const loanData: ApiLoan = {
         book_id: formData.book_id,
@@ -81,29 +83,19 @@ export default function LoanManagement() {
 
       await apiService.createLoan(loanData);
       await loadData();
+      setAlert({ type: 'success', message: 'Loan registered successfully' });
       closeModal();
     } catch (err) {
-      setError('Error creating loan. Book may not be available.');
+      setAlert({ type: 'error', message: 'Error creating loan. Book may not be available.' });
       console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleReturn = async (loanId: number) => {
-    if (confirm('Confirm the return of this loan?')) {
-      try {
-        setLoading(true);
-        setError(null);
-        await apiService.returnLoan(loanId);
-        await loadData();
-      } catch (err) {
-        setError('Error returning loan');
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    }
+  const handleReturn = (loanId: number) => {
+    // open modal confirm
+    setConfirmReturnId(loanId);
   };
 
   const openModal = () => {
@@ -117,7 +109,7 @@ export default function LoanManagement() {
 
   const closeModal = () => {
     setIsModalOpen(false);
-    setError(null);
+    setAlert(null);
   };
 
   const getStatusColor = (status?: string) => {
@@ -183,10 +175,41 @@ export default function LoanManagement() {
         </select>
       </div>
 
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-          {error}
-        </div>
+      {alert && (
+        <Alert
+          type={alert.type}
+          title={alert.type === 'error' ? 'Error' : undefined}
+          message={alert.message}
+          onClose={() => setAlert(null)}
+          autoClose={true}
+        />
+      )}
+
+      {confirmReturnId !== null && (
+        <Alert
+          type="info"
+          title={undefined}
+          message={'Confirm the return of this loan?'}
+          onConfirm={async () => {
+            const id = confirmReturnId;
+            try {
+              setLoading(true);
+              setAlert(null);
+              await apiService.returnLoan(id!);
+              await loadData();
+              setAlert({ type: 'success', message: 'Loan returned successfully' });
+            } catch (err) {
+              setAlert({ type: 'error', message: 'Error returning loan' });
+              console.error(err);
+            } finally {
+              setLoading(false);
+              setConfirmReturnId(null);
+            }
+          }}
+          onClose={() => setConfirmReturnId(null)}
+          showAccept={true}
+          showCancel={true}
+        />
       )}
 
       {loading && (

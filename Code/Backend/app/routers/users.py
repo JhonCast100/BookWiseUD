@@ -65,4 +65,4 @@ def delete_user(
     user = crud_users.delete_user(db, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    return {"message": "User deleted successfully"}
+    return {"message": "User deactivated successfully"}

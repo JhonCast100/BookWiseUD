@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { apiService, ApiBook } from '../../services/api';
 import { BookOpen, Search, Calendar } from 'lucide-react';
+import Alert, { AlertType } from '../layout/Alert';
 
 export default function BookCatalog() {
   const [books, setBooks] = useState<ApiBook[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [alert, setAlert] = useState<{ type: AlertType; title?: string; message: string } | null>(null);
 
   useEffect(() => {
     loadBooks();
@@ -15,11 +16,11 @@ export default function BookCatalog() {
   const loadBooks = async () => {
     try {
       setLoading(true);
-      setError(null);
+      setAlert(null);
       const data = await apiService.getBooks();
       setBooks(data);
     } catch (err) {
-      setError('Error loading books');
+      setAlert({ type: 'error', message: 'Error loading books' });
       console.error(err);
     } finally {
       setLoading(false);
@@ -50,10 +51,14 @@ export default function BookCatalog() {
         />
       </div>
 
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-          {error}
-        </div>
+      {alert && (
+        <Alert
+          type={alert.type}
+          title={alert.type === 'error' ? 'Error' : undefined}
+          message={alert.message}
+          onClose={() => setAlert(null)}
+          autoClose={true}
+        />
       )}
 
       {loading && (

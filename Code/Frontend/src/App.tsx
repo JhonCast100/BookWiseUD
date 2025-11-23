@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { ViewType } from './types';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import Alert from './components/layout/Alert';
 
 // Componentes de Layout
 import Home from './components/layout/Home';
@@ -28,6 +29,23 @@ function AppContent() {
   const [showProfile, setShowProfile] = useState(false);
 
   const isLibrarian = userProfile?.role === 'librarian';
+
+  // --- Render global alert from AuthContext
+  function AuthAlertRenderer() {
+    const { alert, setAlert } = useAuth();
+    if (!alert) return null;
+    return (
+      <div className="mb-6">
+        <Alert
+          type={alert.type}
+          title={alert.type === 'error' ? 'Error' : undefined}
+          message={alert.message}
+          onClose={() => setAlert(null)}
+          autoClose={true}
+        />
+      </div>
+    );
+  }
 
   // Navegación dinámica según el rol del usuario
   const getNavigation = () => {
@@ -137,9 +155,15 @@ function AppContent() {
         onProfileClick={handleProfileClick}
       />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {renderView()}
-      </main>
+      <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Global alert from AuthContext (visible across navigation) */}
+        {/** useAuth is available in this component via hook in AppContent */}
+        <AuthAlertRenderer />
+
+        <main className="flex-1">
+          {renderView()}
+        </main>
+      </div>
 
       <Footer />
 

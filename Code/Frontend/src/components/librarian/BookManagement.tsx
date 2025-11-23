@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { apiService, ApiBook, ApiCategory } from '../../services/api';
 import { BookOpen, Plus, Search, CreditCard as Edit2, Trash2, X } from 'lucide-react';
+import Alert, { AlertType } from '../layout/Alert';
 
 export default function BookManagement() {
   const [books, setBooks] = useState<ApiBook[]>([]);
@@ -17,7 +18,8 @@ export default function BookManagement() {
     status: 'available'
   });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [alert, setAlert] = useState<{ type: AlertType; title?: string; message: string } | null>(null);
+  const [confirmBookId, setConfirmBookId] = useState<number | null>(null);
 
   useEffect(() => {
     loadBooks();
@@ -35,11 +37,11 @@ export default function BookManagement() {
   const loadBooks = async () => {
     try {
       setLoading(true);
-      setError(null);
+      setAlert(null);
       const data = await apiService.getBooks();
       setBooks(data);
     } catch (err) {
-      setError('Error loading books');
+      setAlert({ type: 'error', message: 'Error loading books' });
       console.error(err);
     } finally {
       setLoading(false);
@@ -57,7 +59,7 @@ export default function BookManagement() {
     e.preventDefault();
     try {
       setLoading(true);
-      setError(null);
+      setAlert(null);
 
       const bookData: ApiBook = {
         title: formData.title || '',
@@ -75,29 +77,18 @@ export default function BookManagement() {
       }
 
       await loadBooks();
+      setAlert({ type: 'success', message: editingBook ? 'Book updated successfully' : 'Book added successfully' });
       closeModal();
     } catch (err) {
-      setError('Error saving book');
+      setAlert({ type: 'error', message: 'Error saving book' });
       console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (confirm('Are you sure you want to delete this book?')) {
-      try {
-        setLoading(true);
-        setError(null);
-        await apiService.deleteBook(id);
-        await loadBooks();
-      } catch (err) {
-        setError('Error deleting book');
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    }
+  const handleDelete = (id: number) => {
+    setConfirmBookId(id);
   };
 
   const openModal = async (book?: ApiBook) => {
@@ -170,10 +161,39 @@ export default function BookManagement() {
         </div>
       </div>
 
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-          {error}
-        </div>
+      {alert && (
+        <Alert
+          type={alert.type}
+          title={alert.type === 'error' ? 'Error' : undefined}
+          message={alert.message}
+          onClose={() => setAlert(null)}
+          autoClose={true}
+        />
+      )}
+
+      {confirmBookId !== null && (
+        <Alert
+          type="info"
+          message={'Are you sure you want to deactivate this book?'}
+          onConfirm={async () => {
+            const id = confirmBookId;
+            try {
+              setLoading(true);
+              setAlert(null);
+              await apiService.deleteBook(id!);
+              await loadBooks();
+              setAlert({ type: 'success', message: 'Book deactivated successfully' });
+            } catch (err) {
+              setAlert({ type: 'error', message: 'Error deactivating book' });
+              console.error(err);
+            } finally {
+              setLoading(false);
+              setConfirmBookId(null);
+            }
+          }}
+          onClose={() => setConfirmBookId(null)}
+          showCancel={true}
+        />
       )}
 
       {loading && (

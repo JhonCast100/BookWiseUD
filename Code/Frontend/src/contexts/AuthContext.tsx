@@ -26,6 +26,8 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signUp: (email: string, password: string, fullName: string, role: 'librarian' | 'user') => Promise<{ error: Error | null }>;
   signOut: () => void;
+  alert: { type: 'success' | 'error' | 'info' | 'warning'; title?: string; message: string } | null;
+  setAlert: (a: { type: 'success' | 'error' | 'info' | 'warning'; title?: string; message: string } | null) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -34,6 +36,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [alert, setAlert] = useState<{ type: 'success' | 'error' | 'info' | 'warning'; title?: string; message: string } | null>(null);
 
   // Cargar sesión desde localStorage
   useEffect(() => {
@@ -55,14 +58,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // LOGIN
   const signIn = async (email: string, password: string) => {
     try {
-      console.log('🔑 Attempting login...');
 
       const response = await authClient.post('/auth/login', {
         username: email,
         password
       });
 
-      console.log('📡 Response status:', response.status);
 
       const { token } = response.data;
 
@@ -70,9 +71,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw new Error('No token received from server');
       }
 
-      console.log('🎟️ Token received:', token.substring(0, 30) + '...');
-
-      // ✅ Decodificar JWT correctamente
       const decoded = jwtDecode<TokenPayload>(token);
       console.log('🔓 Token decoded:', decoded);
 
@@ -104,10 +102,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(null);
       setUserProfile(null);
 
-      const errorMessage = error.response?.data?.message ||
+      // Map common auth HTTP status codes to friendly messages
+      let errorMessage = error.response?.data?.message ||
         error.response?.data?.error ||
         error.message ||
         'Login failed';
+
+      if (error.response?.status === 403) {
+        errorMessage = 'Invalid credentials';
+      }
 
       return { error: new Error(errorMessage) };
     }
@@ -116,7 +119,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // SIGNUP
   const signUp = async (email: string, password: string, fullName: string, role: 'librarian' | 'user') => {
     try {
-      console.log('📝 Attempting registration...');
 
       const backendRole = role === 'librarian' ? 'ADMIN' : 'USER';
       const response = await authClient.post('/auth/register', {
@@ -124,8 +126,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         password,
         role: backendRole,
       });
-
-      console.log('📡 Registration response:', response.status);
 
       const { token } = response.data;
 
@@ -153,12 +153,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.setItem('mock_user', JSON.stringify({ id: decoded.id.toString(), email: decoded.username }));
       localStorage.setItem('mock_profile', JSON.stringify(profile));
 
-      console.log('✅ Registration successful!');
       return { error: null };
     } catch (error: any) {
-      console.error('❌ Registration error:', error);
-      console.error('❌ Error response:', error.response?.data);
-
       const errorMessage = error.response?.data?.message ||
         error.response?.data?.error ||
         error.message ||
@@ -177,7 +173,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, userProfile, loading, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ user, userProfile, loading, signIn, signUp, signOut, alert, setAlert }}>
       {children}
     </AuthContext.Provider>
   );

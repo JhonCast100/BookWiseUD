@@ -2,13 +2,14 @@
 import { useState, useEffect } from 'react';
 import { apiService, ApiLoan, ApiBook } from '../../services/api';
 import { BookMarked, Calendar, CheckCircle, Clock, BookOpen, AlertCircle } from 'lucide-react';
+import Alert, { AlertType } from '../layout/Alert';
 
 export default function MyLoans() {
   const [loans, setLoans] = useState<ApiLoan[]>([]);
   const [books, setBooks] = useState<ApiBook[]>([]);
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'returned'>('all');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [alert, setAlert] = useState<{ type: AlertType; title?: string; message: string } | null>(null);
 
   useEffect(() => {
     loadData();
@@ -17,7 +18,7 @@ export default function MyLoans() {
   const loadData = async () => {
     try {
       setLoading(true);
-      setError(null);
+      setAlert(null);
       const [loansData, booksData] = await Promise.all([
         apiService.getMyLoans(),
         apiService.getBooks()
@@ -25,7 +26,7 @@ export default function MyLoans() {
       setLoans(loansData);
       setBooks(booksData);
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Error loading loans');
+      setAlert({ type: 'error', message: err.response?.data?.detail || 'Error loading loans' });
       console.error(err);
     } finally {
       setLoading(false);
@@ -160,10 +161,14 @@ export default function MyLoans() {
         </button>
       </div>
 
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-          {error}
-        </div>
+      {alert && (
+        <Alert
+          type={alert.type}
+          title={alert.type === 'error' ? 'Error' : undefined}
+          message={alert.message}
+          onClose={() => setAlert(null)}
+          autoClose={true}
+        />
       )}
 
       {loading && (

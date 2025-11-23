@@ -6,40 +6,47 @@ export default function Login() {
   const authContext = useAuth();
   console.log("🔍 Auth Context:", authContext);
 
-  const { signIn, signUp } = authContext;
+  
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [role, setRole] = useState<"librarian" | "user">("user");
-  const [error, setError] = useState("");
+  // Use global alert from AuthContext so messages persist across navigation
+  const { signIn, signUp, alert: globalAlert, setAlert: setGlobalAlert } = authContext;
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    setError("");
+    // clear any existing global alert
+    setGlobalAlert(null);
     setLoading(true);
 
     try {
       if (isSignUp) {
-        console.log("📝 Calling signUp...");
         const result = await signUp(email, password, fullName, role);
-        console.log("✅ SignUp result:", result);
         if (result.error) {
-          setError(result.error.message);
+          const msg = result.error.message || '';
+          const isCreds = /credential|invalid|password|email|auth/i.test(msg);
+          setGlobalAlert({ type: 'error', message: isCreds ? 'Invalid credentials' : msg || 'Authentication error' });
+        } else {
+          // Sign up succeeded
+          setGlobalAlert({ type: 'success', message: 'Account created successfully' });
         }
       } else {
-        console.log("🔑 Calling signIn...");
         const result = await signIn(email, password);
-        console.log("✅ SignIn result:", result);
         if (result.error) {
-          setError(result.error.message);
+          const msg = result.error.message || '';
+          const isCreds = /credential|invalid|password|email|auth/i.test(msg);
+          setGlobalAlert({ type: 'error', message: isCreds ? 'Invalid credentials' : msg || 'Login error' });
+        } else {
+          // Sign in succeeded
+          setGlobalAlert({ type: 'success', message: 'Login successful' });
         }
       }
     } catch (err) {
-      console.error("💥 Error:", err);
-      setError("An unexpected error occurred");
+          setGlobalAlert({ type: 'error', message: 'An unexpected error occurred' });
     } finally {
       setLoading(false);
     }
@@ -162,11 +169,7 @@ export default function Login() {
             </div>
           </div>
 
-          {error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-sm text-red-600">{error}</p>
-            </div>
-          )}
+          {/* Global alert shown at top-level (App.tsx) */}
 
           <button
             type="submit"
@@ -181,11 +184,11 @@ export default function Login() {
         <div className="mt-6 text-center">
           <button
             type="button"
-            onClick={() => {
-              console.log("🔄 Switching to", !isSignUp ? "SignUp" : "SignIn");
-              setIsSignUp(!isSignUp);
-              setError("");
-            }}
+              onClick={() => {
+                console.log("🔄 Switching to", !isSignUp ? "SignUp" : "SignIn");
+                setIsSignUp(!isSignUp);
+                setGlobalAlert(null);
+              }}
             className="text-emerald-600 hover:text-emerald-700 font-medium"
           >
             {isSignUp
