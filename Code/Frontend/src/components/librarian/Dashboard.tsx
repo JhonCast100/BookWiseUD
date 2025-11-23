@@ -1,7 +1,7 @@
 // src/components/librarian/Dashboard.tsx
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { apiService } from '../../services/api';
+import { apiService, ApiUser, ApiLoan } from '../../services/api';
 import { BookOpen, Users, BookMarked, CheckCircle } from 'lucide-react';
 import Alert, { AlertType } from '../layout/Alert';
 
@@ -37,8 +37,8 @@ export default function Dashboard() {
       // Cargar datos según el rol
       const books = await apiService.getBooks();
       
-      let users = [];
-      let loans = [];
+      let users: ApiUser[] = [];
+      let loans: ApiLoan[] = [];
       
       try {
         if (isLibrarian) {

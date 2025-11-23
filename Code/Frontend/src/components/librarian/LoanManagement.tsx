@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { apiService, ApiLoan, ApiBook, ApiUser } from '../../services/api';
-import { BookMarked, Plus, Search, X, CheckCircle, AlertCircle, Calendar } from 'lucide-react';
+import { BookMarked, Plus, Search, X, CheckCircle, Calendar } from 'lucide-react';
 import Alert, { AlertType } from '../layout/Alert';
 
 export default function LoanManagement() {
@@ -83,8 +83,9 @@ export default function LoanManagement() {
 
       await apiService.createLoan(loanData);
       await loadData();
+      // Close modal first, then show success alert so it's not immediately cleared
+      setIsModalOpen(false);
       setAlert({ type: 'success', message: 'Loan registered successfully' });
-      closeModal();
     } catch (err) {
       setAlert({ type: 'error', message: 'Error creating loan. Book may not be available.' });
       console.error(err);
