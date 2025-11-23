@@ -34,14 +34,14 @@ class TestStatisticsEndpoint:
         assert data["active_loans"] >= 1
         assert data["available_books"] >= 0
     
-    def test_dashboard_stats_empty_database(self, client, auth_headers, sample_user):
+    def test_dashboard_stats_empty_database(self, client, auth_headers):
         """GET /stats/dashboard debe funcionar con base de datos vacía"""
         response = client.get("/stats/dashboard", headers=auth_headers)
         assert response.status_code == 200
         
         data = response.json()
         assert data["total_books"] == 0
-        assert data["total_users"] >= 1  # Al menos el usuario autenticado
+        assert data["total_users"] == 1  # Solo el usuario autenticado
         assert data["active_loans"] == 0
         assert data["available_books"] == 0
     
@@ -50,8 +50,7 @@ class TestStatisticsEndpoint:
         client,
         auth_headers,
         db_session,
-        sample_category,
-        sample_user
+        sample_category
     ):
         """Las estadísticas deben reflejar múltiples libros correctamente"""
         from app.models.book import Book
@@ -83,8 +82,7 @@ class TestStatisticsEndpoint:
         client,
         auth_headers,
         db_session,
-        sample_loan,
-        sample_user
+        sample_loan
     ):
         """Los préstamos devueltos no deben contarse como activos"""
         sample_loan.status = "returned"
@@ -199,6 +197,7 @@ class TestIntegrationStats:
             "category_id": sample_category.category_id
         }
         book_response = client.post("/books/", json=book_data)
+        assert book_response.status_code == 200, f"Failed to create book: {book_response.json()}"
         book_id = book_response.json()["book_id"]
         
         # Crear un usuario
@@ -209,6 +208,7 @@ class TestIntegrationStats:
             "status": "active"
         }
         user_response = client.post("/users/", json=user_data, headers=admin_headers)
+        assert user_response.status_code == 200, f"Failed to create user: {user_response.json()}"
         user_id = user_response.json()["user_id"]
         
         # Verificar que aumentaron libros y usuarios
@@ -226,6 +226,7 @@ class TestIntegrationStats:
             "loan_date": str(date.today())
         }
         loan_response = client.post("/loans/", json=loan_data, headers=admin_headers)
+        assert loan_response.status_code == 200, f"Failed to create loan: {loan_response.json()}"
         loan_id = loan_response.json()["loan_id"]
         
         # Verificar que aumentaron préstamos activos y disminuyeron disponibles

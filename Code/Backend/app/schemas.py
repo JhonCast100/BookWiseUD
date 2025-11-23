@@ -19,10 +19,10 @@ class Category(CategoryBase):
 class BookBase(BaseModel):
     title: str
     author: str
-    publication_year: Optional[int]
+    publication_year: Optional[int] = None
     isbn: str
     status: Optional[str] = "available"
-    category_id: Optional[int]
+    category_id: Optional[int] = None
 
 class BookCreate(BookBase):
     pass
@@ -36,7 +36,7 @@ class Book(BookBase):
 class UserBase(BaseModel):
     full_name: str
     email: str
-    phone: Optional[str]
+    phone: Optional[str] = None
     status: Optional[str] = "active"
     auth_id: Optional[int] = None
 
