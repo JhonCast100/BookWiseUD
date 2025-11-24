@@ -1,0 +1,101 @@
+Feature: Book management (admin) # features/book_management.feature:1
+  As an admin
+  I want to add, update and delete books
+  So that the catalog can be maintained
+  Scenario: Add a new book                    # features/book_management.feature:6
+    Given the book payload:                   # features/steps/http_steps.py:31
+      | title          | author      | isbn        |
+      | New Book Title | Some Author | 97812345678 |
+    When I POST the payload to "/api/books"   # features/steps/http_steps.py:73
+    Then the response status should be 201    # features/steps/http_steps.py:110
+      ASSERT FAILED: Expected 201, got 404: {"detail":"Not Found"}
+
+    And the response JSON should contain "id" # None
+
+  Scenario: Update a book                    # features/book_management.feature:14
+    Given a book id "1"                      # features/steps/http_steps.py:42
+    And the book payload:                    # features/steps/http_steps.py:31
+      | title         |
+      | Updated Title |
+    When I PUT the payload to "/api/books/1" # features/steps/http_steps.py:96
+    Then the response status should be 200   # features/steps/http_steps.py:110
+      ASSERT FAILED: Expected 200, got 404: {"detail":"Not Found"}
+
+
+  Scenario: Delete a book                  # features/book_management.feature:22
+    Given a book id "1"                    # features/steps/http_steps.py:42
+    When I DELETE "/api/books/1"           # features/steps/http_steps.py:103
+    Then the response status should be 204 # features/steps/http_steps.py:110
+      ASSERT FAILED: Expected 204, got 404: {"detail":"Not Found"}
+
+
+Feature: Books listing and details # features/books.feature:1
+  As an application user
+  I want to view available books
+  So that I can browse and select books
+  Scenario: List books                       # features/books.feature:6
+    When I GET "/api/books"                  # features/steps/http_steps.py:89
+    Then the response status should be 200   # features/steps/http_steps.py:110
+      ASSERT FAILED: Expected 200, got 404: {"detail":"Not Found"}
+
+    And the response JSON should be an array # None
+
+  Scenario: Get book details                     # features/books.feature:11
+    Given a book id "1"                          # features/steps/http_steps.py:42
+    When I GET "/api/books/1"                    # features/steps/http_steps.py:89
+    Then the response status should be 200       # features/steps/http_steps.py:110
+      ASSERT FAILED: Expected 200, got 404: {"detail":"Not Found"}
+
+    And the response JSON should contain "title" # None
+
+Feature: Borrow and return flow # features/borrow_return.feature:1
+  As a registered user
+  I want to borrow and return books
+  So that I can use the library services
+  Scenario: Borrow a book                           # features/borrow_return.feature:6
+    Given a user with id "1"                        # features/steps/http_steps.py:37
+    And a book id "1"                               # features/steps/http_steps.py:42
+    When I POST the payload to "/api/borrow" with:  # features/steps/http_steps.py:81
+      | user_id | book_id |
+      | 1       | 1       |
+    Then the response status should be 200          # features/steps/http_steps.py:110
+      ASSERT FAILED: Expected 200, got 404: {"detail":"Not Found"}
+
+    And the response JSON should contain "due_date" # None
+
+  Scenario: Return a book                          # features/borrow_return.feature:15
+    Given a user with id "1"                       # features/steps/http_steps.py:37
+    And a book id "1"                              # features/steps/http_steps.py:42
+    When I POST the payload to "/api/return" with: # features/steps/http_steps.py:81
+      | user_id | book_id |
+      | 1       | 1       |
+    Then the response status should be 200         # features/steps/http_steps.py:110
+      ASSERT FAILED: Expected 200, got 404: {"detail":"Not Found"}
+
+
+Feature: User login # features/login.feature:1
+  As a registered user
+  I want to log in
+  So that I can access protected resources
+  Scenario: Successful login                                                     # features/login.feature:6
+    Given a user with email "john.doe@example.com" and password "Jd@2025!Secure" # features/steps/login_steps.py:7
+    When the user submits valid credentials to "/api/auth/login"                 # features/steps/login_steps.py:11
+    Then the response status should be 200                                       # features/steps/http_steps.py:110
+      ASSERT FAILED: Expected 200, got 404: {"detail":"Not Found"}
+
+    And the response JSON should contain "token"                                 # None
+
+Feature: User registration # features/register.feature:1
+  As a new user
+  I want to register an account
+  So that I can log in later
+  Scenario: Successful registration                 # features/register.feature:6
+    Given the registration payload:                 # features/steps/http_steps.py:24
+      | email                | password      | name     |
+      | new.user@example.com | NewUser@2025! | New User |
+    When I POST the payload to "/api/auth/register" # features/steps/http_steps.py:73
+    Then the response status should be 201          # features/steps/http_steps.py:110
+      ASSERT FAILED: Expected 201, got 404: {"detail":"Not Found"}
+
+    And the response JSON should contain "id"       # None
+

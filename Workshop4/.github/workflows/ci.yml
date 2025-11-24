@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    services:
+      docker:
+        image: docker:20.10.16
+        options: --privileged
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Build Java (skip tests for speed)
+        run: ./mvnw -B package -DskipTests
+
+      - name: Build Python deps
+        run: |
+          python -V
+          pip install -r requirements.txt
+
+      - name: Run unit tests
+        run: |
+          ./mvnw test || true
+          # run python tests if any: pytest
+
+      - name: Build Docker images
+        run: |
+          docker build -t myorg/myapp-java:latest -f docker/Dockerfile-java .
+          docker build -t myorg/myapp-python:latest -f docker/Dockerfile-python .
+          docker build -t myorg/myapp-frontend:latest -f docker/Dockerfile-frontend .

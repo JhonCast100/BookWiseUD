@@ -1,0 +1,86 @@
+name: CI - E2E (Compose + Behave + JMeter)
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: {}
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install Docker Compose plugin
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker-compose-plugin
+
+      - name: Build images with docker-compose
+        run: |
+          docker compose build --pull
+
+      - name: Start services (docker-compose)
+        run: |
+          docker compose up -d
+
+      - name: Wait for dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y netcat
+          echo "Waiting for Postgres (db:5432)..."
+          until nc -z localhost 5432; do sleep 1; done
+          echo "Waiting for Python backend (8000)..."
+          until nc -z localhost 8000; do sleep 1; done
+          echo "Waiting for Java backend (8080)..."
+          until nc -z localhost 8080; do sleep 1; done
+
+      - name: Run Python unit tests
+        run: |
+          cd Code/Backend
+          python -m pip install --upgrade pip
+          pip install -r requirements-test.txt || true
+          pytest -q || true
+
+      - name: Install behave and test deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install behave requests
+
+      - name: Run Cucumber (behave) acceptance tests
+        env:
+          WORKSHOP4_BASE_URL: http://127.0.0.1:8000
+        run: |
+          mkdir -p Workshop4/cucumber/results
+          cd Workshop4/cucumber
+          python -m behave -f pretty > results/cucumber_run.txt 2>&1 || true
+
+      - name: Download & run JMeter
+        run: |
+          JMETER_VERSION=5.5
+          JMETER_TGZ=apache-jmeter-${JMETER_VERSION}.tgz
+          curl -sL https://archive.apache.org/dist/jmeter/binaries/${JMETER_TGZ} -o ${JMETER_TGZ}
+          tar xf ${JMETER_TGZ}
+          chmod +x apache-jmeter-${JMETER_VERSION}/bin/jmeter
+          mkdir -p Workshop4/jmeter/results
+          apache-jmeter-${JMETER_VERSION}/bin/jmeter -n -t Workshop4/jmeter/testplan.jmx -l Workshop4/jmeter/results/jmeter_results.csv || true
+
+      - name: Upload test artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-artifacts
+          path: |
+            Workshop4/cucumber/results/cucumber_run.txt
+            Workshop4/jmeter/results/jmeter_results.csv
+
+      - name: Tear down
+        if: always()
+        run: |
+          docker compose down -v

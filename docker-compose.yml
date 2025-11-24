@@ -1,0 +1,88 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: bookwise
+      POSTGRES_PASSWORD: bookwise_pass
+      POSTGRES_DB: bookwise
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bookwise"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - booknet
+
+  python-backend:
+    build:
+      context: ./Code/Backend
+    image: bookwise_api:latest
+    environment:
+      DATABASE_URL: postgresql+psycopg2://bookwise:bookwise_pass@db:5432/bookwise
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    networks:
+      - booknet
+
+  java-backend:
+    build:
+      context: ./Code/BackendAuthentication
+    image: bookwise_auth:latest
+    environment:
+      # Spring Boot reads SPRING_DATASOURCE_* environment variables
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/securitydb?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: 2828
+    depends_on:
+      mysql:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    networks:
+      - booknet
+
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: 2828
+      MYSQL_DATABASE: securitydb
+      # Do NOT set MYSQL_USER=root; use MYSQL_ROOT_PASSWORD instead.
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./Code/utils/ScriptSecurity-mysql.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p\"2828\"" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - booknet
+
+  frontend:
+    build:
+      context: ./Code/Frontend
+    image: bookwise_frontend:latest
+    ports:
+      # map host 5173 to container 80 so development expectations match (CORS)
+      - "5173:80"
+    depends_on:
+      - python-backend
+      - java-backend
+    networks:
+      - booknet
+
+volumes:
+  db_data:
+  mysql_data:
+
+networks:
+  booknet:
+    driver: bridge

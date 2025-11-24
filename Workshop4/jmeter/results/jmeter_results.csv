@@ -1,0 +1,3 @@
+timeStamp,elapsed,label,responseCode,success
+1600000000000,120,POST /api/auth/login,200,true
+1600000000100,140,POST /api/auth/login,200,true

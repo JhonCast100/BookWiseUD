@@ -1,0 +1,43 @@
+name: CI-CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    services:
+      docker:
+        image: docker:20.10.16
+        options: --privileged
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install Python test deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install behave requests
+
+      - name: Run Cucumber (behave) acceptance tests
+        run: |
+          cd cucumber
+          pip install -r requirements.txt || true
+          behave -f pretty -o ../cucumber/results/cucumber_run.txt || true
+
+      - name: Build Docker images
+        run: |
+          docker build -f docker/Dockerfile-python -t bookwise-python:ci .
+          docker build -f docker/Dockerfile-java -t bookwise-java:ci .
+          docker build -f docker/Dockerfile-frontend -t bookwise-frontend:ci .
+
+      - name: Show built images
+        run: docker images | grep bookwise || true

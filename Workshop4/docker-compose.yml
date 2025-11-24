@@ -1,0 +1,70 @@
+version: '3.8'
+services:
+  auth:
+    build:
+      context: ../Code/BackendAuthentication
+    image: bookwise_auth:latest
+    ports:
+      - "8080:8080"
+    networks:
+      - booknet
+
+  api:
+    build:
+      context: ../Code/Backend
+    image: bookwise_api:latest
+    ports:
+      - "8000:8000"
+    networks:
+      - booknet
+
+  frontend:
+    build:
+      context: ../Code/Frontend
+    image: bookwise_frontend:latest
+    ports:
+      # map host 5173 to container 80 so existing CORS config works with localhost:5173
+      - "5173:80"
+    depends_on:
+      - api
+      - auth
+    networks:
+      - booknet
+
+networks:
+  booknet:
+    driver: bridge
+version: '3.8'
+services:
+  java-backend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile-java
+    image: bookwise-java:latest
+    ports:
+      - "8080:8080"
+    depends_on:
+      - python-backend
+
+  python-backend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile-python
+    image: bookwise-python:latest
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile-frontend
+    image: bookwise-frontend:latest
+    ports:
+      - "3000:80"
+    depends_on:
+      - java-backend
+      - python-backend
+
+networks:
+  default:
+    name: bookwise-network

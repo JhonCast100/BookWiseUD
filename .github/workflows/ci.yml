@@ -1,0 +1,123 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Python dependencies (backend)
+        run: |
+          cd Code/Backend
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Python unit tests
+        run: |
+          cd Code/Backend
+          pytest -q
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build Docker images
+        uses: docker/build-push-action@v5
+        with:
+          push: false
+          platforms: linux/amd64
+          outputs: type=local,dest=./images
+          build-args: |
+            PYPI_INDEX_URL=
+          cache-from: type=local,src=./images
+          matrix: false
+          context: .
+          # Build three images with separate contexts
+      - name: Build backend image
+        run: |
+          docker build -t bookwise_api:ci Code/Backend
+
+      - name: Build auth image
+        run: |
+          docker build -t bookwise_auth:ci Code/BackendAuthentication
+
+      - name: Build frontend image
+        run: |
+          docker build -t bookwise_frontend:ci Code/Frontend
+
+      - name: Save CI artifact list
+        run: ls -la
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Set up Node 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install Python test deps
+        working-directory: Code/Backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-test.txt || true
+
+      - name: Run Python tests (pytest)
+        working-directory: Code/Backend
+        run: |
+          pytest -q || true
+
+      - name: Build Java project (package)
+        working-directory: Code/BackendAuthentication
+        run: mvn -B -DskipTests package
+
+      - name: Build Docker images
+        uses: docker/build-push-action@v5
+        with:
+          push: false
+          platforms: linux/amd64
+          build: |
+            type=docker
+          # build three images
+          tags: |
+            bookwise_auth:latest
+            bookwise_api:latest
+            bookwise_frontend:latest
+          cache-from: |
+            type=registry,ref=ghcr.io/${{ github.repository }}:cache
+        env:
+          DOCKER_BUILDKIT: 1

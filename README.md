@@ -1,3 +1,107 @@
+# BookWiseUD — Dockerization, Tests and CI
+
+This repository contains three main components and test artifacts used in Workshop4:
+
+- `Code/Backend` — Python FastAPI backend
+- `Code/BackendAuthentication` — Java (Spring Boot) authentication service
+- `Code/Frontend` — Frontend app (Vite + React) built and served with nginx
+
+This README explains how to run the application with Docker Compose, how to run unit and acceptance tests, how to run the included JMeter stress plan, and the CI workflow in GitHub Actions.
+
+All instructions assume you are using PowerShell on Windows (adjust `cd` and environment variable commands for other shells).
+
+## 1) Prerequisites
+
+- Docker and Docker Compose installed locally
+- Python 3.10+ and a virtual environment for running unit tests locally
+- JMeter (for running the provided `.jmx` plan) if you want to replay stress tests locally
+
+## 2) Run unit tests (Python)
+
+Open a PowerShell terminal:
+
+```powershell
+cd Code\Backend
+venv\Scripts\activate
+pytest
+```
+
+## 3) Run the full stack with Docker Compose
+
+From the repository root run:
+
+```powershell
+docker-compose up --build
+```
+
+This will build and start the following services:
+
+- `db` — Postgres database
+- `python-backend` — FastAPI app (exposed on host port `8000`)
+- `java-backend` — Java auth service (exposed on host port `8080`)
+- `frontend` — Frontend served by nginx (host port `5173` mapped to container port `80`)
+
+To stop and remove containers:
+
+```powershell
+docker-compose down -v
+```
+
+Notes: The Python backend expects a `DATABASE_URL` environment variable; `docker-compose.yml` configures `DATABASE_URL` for a local Postgres instance created by the compose file.
+
+## 4) Acceptance tests (Cucumber / Behave)
+
+Feature files and step definitions are in `Workshop4/cucumber/features`.
+
+To run them locally you must point the steps to the running backend. Example (PowerShell):
+
+```powershell
+# start the docker compose stack first (see section above)
+cd Workshop4\cucumber
+# (optional) set a base URL if your backend is at a different host/port
+$env:WORKSHOP4_BASE_URL='http://127.0.0.1:8000'
+python -m behave -f pretty
+```
+
+If the services are not running, the Cucumber scenarios will fail with connection errors. The file `Workshop4/cucumber/results/cucumber_run.txt` contains a sample run output captured during validation.
+
+## 5) Stress tests (JMeter)
+
+JMeter test plan is available at `Workshop4/jmeter/testplan.jmx`.
+There is a sample result file at `Workshop4/jmeter/results/jmeter_results.csv`.
+
+To run the plan (non-GUI) once the backend runs at `http://localhost:8000`:
+
+```powershell
+# change paths accordingly to JMeter installation
+"C:\\Program Files\\Apache\\jmeter\\bin\\jmeter.bat" -n -t Workshop4\jmeter\testplan.jmx -l Workshop4\jmeter\results\jmeter_results.csv
+```
+
+Open the CSV or import into JMeter GUI listeners to inspect results.
+
+## 6) CI / GitHub Actions
+
+The workflow `.github/workflows/ci.yml` runs on push/PR to `main` and:
+
+- Installs Python and dependencies for the Python backend
+- Runs `pytest` in `Code/Backend`
+- Builds Docker images for the three components (no push)
+
+You can inspect the CI run logs on GitHub Actions for evidence of successful runs. The workflow builds images but does not push them to a registry.
+
+## 7) Evidence included
+
+- Cucumber run sample: `Workshop4/cucumber/results/cucumber_run.txt`
+- JMeter sample results: `Workshop4/jmeter/results/jmeter_results.csv`
+
+## 8) Notes and next steps
+
+- I did not modify backend application logic or add mocks — the docker-compose orchestrates real services.
+- If you want the CI to run acceptance tests inside the workflow (requires starting services in CI), I can extend the workflow to run `docker-compose` and then run `behave` and `jmeter` inside the job.
+
+If you want, I can now:
+- extend CI to run acceptance tests after bringing up services, or
+- provide a small script to wait-for the DB and run database migrations before starting the Python backend in container.
 # 📚 BookWiseUD
 
 **Smart Library Management System for Schools, Universities, and Public Libraries.**
