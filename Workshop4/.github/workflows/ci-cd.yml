@@ -9,10 +9,6 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-    services:
-      docker:
-        image: docker:20.10.16
-        options: --privileged
 
     steps:
       - uses: actions/checkout@v4
@@ -31,13 +27,21 @@ jobs:
         run: |
           cd cucumber
           pip install -r requirements.txt || true
-          behave -f pretty -o ../cucumber/results/cucumber_run.txt || true
+          mkdir -p results
+          python -m behave -f pretty -o results/cucumber_run.txt || true
 
       - name: Build Docker images
         run: |
-          docker build -f docker/Dockerfile-python -t bookwise-python:ci .
-          docker build -f docker/Dockerfile-java -t bookwise-java:ci .
-          docker build -f docker/Dockerfile-frontend -t bookwise-frontend:ci .
+          docker build -f "Workshop 3/Code/Backend/Dockerfile" -t bookwise-python:ci "Workshop 3/Code/Backend"
+          docker build -f "Workshop 3/Code/BackendAuthentication/Dockerfile" -t bookwise-java:ci "Workshop 3/Code/BackendAuthentication"
+          docker build -f "Workshop 3/Code/Frontend/Dockerfile" -t bookwise-frontend:ci "Workshop 3/Code/Frontend"
 
       - name: Show built images
         run: docker images | grep bookwise || true
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: cucumber/results/

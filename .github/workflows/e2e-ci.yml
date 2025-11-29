@@ -18,33 +18,40 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install Docker Compose plugin
+      - name: Install Docker Compose
         run: |
-          sudo apt-get update
-          sudo apt-get install -y docker-compose-plugin
+          curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          chmod +x /usr/local/bin/docker-compose
+          docker-compose --version
 
       - name: Build images with docker-compose
         run: |
-          docker compose build --pull
+          docker-compose build --pull
 
       - name: Start services (docker-compose)
         run: |
-          docker compose up -d
+          docker-compose up -d
+          sleep 10
+
+      - name: Check services are running
+        run: |
+          docker-compose ps
+          docker-compose logs
 
       - name: Wait for dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y netcat
+          sudo apt-get install -y netcat-traditional
           echo "Waiting for Postgres (db:5432)..."
-          until nc -z localhost 5432; do sleep 1; done
+          for i in {1..30}; do nc -z localhost 5432 && echo "Postgres ready!" && break || (echo "Waiting... attempt $i"; sleep 2); done
           echo "Waiting for Python backend (8000)..."
-          until nc -z localhost 8000; do sleep 1; done
+          for i in {1..30}; do nc -z localhost 8000 && echo "Python backend ready!" && break || (echo "Waiting... attempt $i"; sleep 2); done
           echo "Waiting for Java backend (8080)..."
-          until nc -z localhost 8080; do sleep 1; done
+          for i in {1..30}; do nc -z localhost 8080 && echo "Java backend ready!" && break || (echo "Waiting... attempt $i"; sleep 2); done
 
       - name: Run Python unit tests
         run: |
-          cd Code/Backend
+          cd "Workshop 3/Code/Backend"
           python -m pip install --upgrade pip
           pip install -r requirements-test.txt || true
           pytest -q || true
@@ -64,7 +71,7 @@ jobs:
 
       - name: Download & run JMeter
         run: |
-          JMETER_VERSION=5.5
+          JMETER_VERSION=5.6.2
           JMETER_TGZ=apache-jmeter-${JMETER_VERSION}.tgz
           curl -sL https://archive.apache.org/dist/jmeter/binaries/${JMETER_TGZ} -o ${JMETER_TGZ}
           tar xf ${JMETER_TGZ}
@@ -80,7 +87,12 @@ jobs:
             Workshop4/cucumber/results/cucumber_run.txt
             Workshop4/jmeter/results/jmeter_results.csv
 
+      - name: Show logs before teardown
+        if: always()
+        run: |
+          docker-compose logs || true
+
       - name: Tear down
         if: always()
         run: |
-          docker compose down -v
+          docker-compose down -v
