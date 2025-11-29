@@ -59,7 +59,7 @@ jobs:
       - name: Install behave and test deps
         run: |
           python -m pip install --upgrade pip
-          pip install behave requests
+          pip install behave behave-html-formatter requests
 
       - name: Run Cucumber (behave) acceptance tests
         env:
@@ -67,7 +67,7 @@ jobs:
         run: |
           mkdir -p Workshop4/cucumber/results
           cd Workshop4/cucumber
-          python -m behave -f pretty > results/cucumber_run.txt 2>&1 || true
+          python -m behave -f plain > results/cucumber_run.txt 2>&1 || true
 
       - name: Download & run JMeter
         run: |
