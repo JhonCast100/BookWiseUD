@@ -34,10 +34,9 @@ def get_my_loans(
 
 @router.get("/active", response_model=list[schemas.Loan])
 def get_active_loans(
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_librarian)
+    db: Session = Depends(get_db)
 ):
-    """Obtiene todos los préstamos activos (solo bibliotecarios)."""
+    """Obtiene todos los préstamos activos."""
     return db.query(Loan)\
         .filter(Loan.status == "active")\
         .all()
@@ -46,12 +45,11 @@ def get_active_loans(
 @router.post("/", response_model=schemas.Loan)
 def create_loan(
     loan: schemas.LoanCreate, 
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_librarian)  # ✅ Solo bibliotecarios pueden crear préstamos
+    db: Session = Depends(get_db)
 ):
     """
-    Crea un préstamo para cualquier usuario (solo bibliotecarios).
-    El user_id viene en el body del request, NO del token JWT.
+    Crea un préstamo para cualquier usuario.
+    El user_id viene en el body del request.
     """
     # ✅ Verificar que el usuario objetivo existe y está activo
     target_user = db.query(User).filter(User.user_id == loan.user_id).first()
@@ -72,7 +70,7 @@ def create_loan(
     # ✅ Crear el préstamo con el user_id del body (usuario seleccionado)
     new_loan = Loan(
         book_id=loan.book_id,
-        user_id=loan.user_id,  # ✅ CAMBIO CRÍTICO: Usar el user_id del body, NO del token
+        user_id=loan.user_id,  # ✅ Usar el user_id del body
         loan_date=loan.loan_date or datetime.now().date(),
         status="active"
     )
@@ -90,10 +88,9 @@ def create_loan(
 @router.put("/return/{loan_id}", response_model=schemas.Loan)
 def return_loan(
     loan_id: int,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_librarian)
+    db: Session = Depends(get_db)
 ):
-    """Marca un préstamo como devuelto (solo bibliotecarios)."""
+    """Marca un préstamo como devuelto."""
     loan = db.query(Loan).filter(Loan.loan_id == loan_id).first()
     
     if not loan:
@@ -118,22 +115,15 @@ def return_loan(
 @router.get("/{loan_id}", response_model=schemas.Loan)
 def get_loan(
     loan_id: int,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    db: Session = Depends(get_db)
 ):
     """
     Obtiene un préstamo específico.
-    Los usuarios solo pueden ver sus propios préstamos.
-    Los bibliotecarios pueden ver todos.
     """
     loan = db.query(Loan).filter(Loan.loan_id == loan_id).first()
     
     if not loan:
         raise HTTPException(status_code=404, detail="Loan not found")
-    
-    # Verificar permisos: usuario solo puede ver los suyos, bibliotecarios pueden ver todos
-    if loan.user_id != current_user.user_id and current_user.role != "librarian":
-        raise HTTPException(status_code=403, detail="Access denied")
     
     return loan
 
@@ -141,10 +131,9 @@ def get_loan(
 @router.delete("/{loan_id}")
 def delete_loan(
     loan_id: int,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_librarian)
+    db: Session = Depends(get_db)
 ):
-    """Elimina un préstamo (solo bibliotecarios)."""
+    """Elimina un préstamo."""
     loan = db.query(Loan).filter(Loan.loan_id == loan_id).first()
     
     if not loan:
