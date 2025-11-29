@@ -19,7 +19,7 @@ services:
 
   python-backend:
     build:
-      context: ./Code/Backend
+      context: "./Workshop 3/Code/Backend"
     image: bookwise_api:latest
     environment:
       DATABASE_URL: postgresql+psycopg2://bookwise:bookwise_pass@db:5432/bookwise
@@ -33,7 +33,7 @@ services:
 
   java-backend:
     build:
-      context: ./Code/BackendAuthentication
+      context: "./Workshop 3/Code/BackendAuthentication"
     image: bookwise_auth:latest
     environment:
       # Spring Boot reads SPRING_DATASOURCE_* environment variables
@@ -57,7 +57,7 @@ services:
       # Do NOT set MYSQL_USER=root; use MYSQL_ROOT_PASSWORD instead.
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./Code/utils/ScriptSecurity-mysql.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+      - "./Workshop 3/Code/utils/ScriptSecurity-mysql.sql:/docker-entrypoint-initdb.d/01-init.sql:ro"
     healthcheck:
       test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p\"2828\"" ]
       interval: 10s
@@ -68,7 +68,7 @@ services:
 
   frontend:
     build:
-      context: ./Code/Frontend
+      context: "./Workshop 3/Code/Frontend"
     image: bookwise_frontend:latest
     ports:
       # map host 5173 to container 80 so development expectations match (CORS)

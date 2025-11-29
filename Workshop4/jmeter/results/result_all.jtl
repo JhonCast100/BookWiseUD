@@ -1,51 +1,91 @@
 timeStamp,elapsed,label,responseCode,responseMessage,threadName,dataType,success,failureMessage,bytes,sentBytes,grpThreads,allThreads,URL,Latency,IdleTime,Connect
-1764001591734,31,POST Java /auth/register,Non HTTP response code: org.apache.http.conn.HttpHostConnectException,"Non HTTP response message: Connect to localhost:8080 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Connection refused (Connection refused)",Full Load 1-1,text,false,,2673,0,1,1,http://localhost:8080/auth/register,0,0,31
-1764001591769,1,POST Java /auth/login,Non HTTP response code: org.apache.http.conn.HttpHostConnectException,"Non HTTP response message: Connect to localhost:8080 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Connection refused (Connection refused)",Full Load 1-1,text,false,,2673,0,1,1,http://localhost:8080/auth/login,0,0,1
-1764001591772,2,GET Python /health,Non HTTP response code: org.apache.http.conn.HttpHostConnectException,"Non HTTP response message: Connect to localhost:8000 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Connection refused (Connection refused)",Full Load 1-1,text,false,,2673,0,1,1,http://localhost:8000/health,0,0,1
-1764001591774,1,GET /books,Non HTTP response code: org.apache.http.conn.HttpHostConnectException,"Non HTTP response message: Connect to localhost:8000 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Connection refused (Connection refused)",Full Load 1-1,text,false,,2673,0,1,1,http://localhost:8000/books,0,0,1
-1764001591775,1,GET /books/available,Non HTTP response code: org.apache.http.conn.HttpHostConnectException,"Non HTTP response message: Connect to localhost:8000 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Connection refused (Connection refused)",Full Load 1-1,text,false,,2673,0,1,1,http://localhost:8000/books/available,0,0,1
-1764001591777,1,GET /categories,Non HTTP response code: org.apache.http.conn.HttpHostConnectException,"Non HTTP response message: Connect to localhost:8000 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Connection refused (Connection refused)",Full Load 1-1,text,false,,2673,0,1,1,http://localhost:8000/categories,0,0,1
-1764001591779,1,GET /users,Non HTTP response code: org.apache.http.conn.HttpHostConnectException,"Non HTTP response message: Connect to localhost:8000 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Connection refused (Connection refused)",Full Load 1-1,text,false,,2673,0,1,1,http://localhost:8000/users,0,0,1
-1764001591780,1,GET /loans,Non HTTP response code: org.apache.http.conn.HttpHostConnectException,"Non HTTP response message: Connect to localhost:8000 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Connection refused (Connection refused)",Full Load 1-1,text,false,,2673,0,1,1,http://localhost:8000/loans,0,0,1
-1764001591781,1,POST /categories,Non HTTP response code: org.apache.http.conn.HttpHostConnectException,"Non HTTP response message: Connect to localhost:8000 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Connection refused (Connection refused)",Full Load 1-1,text,false,,2673,0,1,1,http://localhost:8000/categories,0,0,1
-1764001591782,1,POST /books,Non HTTP response code: org.apache.http.conn.HttpHostConnectException,"Non HTTP response message: Connect to localhost:8000 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Connection refused (Connection refused)",Full Load 1-1,text,false,,2673,0,1,1,http://localhost:8000/books,0,0,1
-1764001592596,1,POST Java /auth/register,Non HTTP response code: org.apache.http.conn.HttpHostConnectException,"Non HTTP response message: Connect to localhost:8080 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Connection refused (Connection refused)",Full Load 1-2,text,false,,2673,0,1,1,http://localhost:8080/auth/register,0,0,1
-1764001592597,1,POST Java /auth/login,Non HTTP response code: org.apache.http.conn.HttpHostConnectException,"Non HTTP response message: Connect to localhost:8080 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Connection refused (Connection refused)",Full Load 1-2,text,false,,2673,0,1,1,http://localhost:8080/auth/login,0,0,1
-1764001592600,0,GET Python /health,Non HTTP response code: org.apache.http.conn.HttpHostConnectException,"Non HTTP response message: Connect to localhost:8000 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Connection refused (Connection refused)",Full Load 1-2,text,false,,2673,0,1,1,http://localhost:8000/health,0,0,0
-1764001592601,1,GET /books,Non HTTP response code: org.apache.http.conn.HttpHostConnectException,"Non HTTP response message: Connect to localhost:8000 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Connection refused (Connection refused)",Full Load 1-2,text,false,,2673,0,1,1,http://localhost:8000/books,0,0,1
-1764001592602,1,GET /books/available,Non HTTP response code: org.apache.http.conn.HttpHostConnectException,"Non HTTP response message: Connect to localhost:8000 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Connection refused (Connection refused)",Full Load 1-2,text,false,,2673,0,1,1,http://localhost:8000/books/available,0,0,1
-1764001592603,1,GET /categories,Non HTTP response code: org.apache.http.conn.HttpHostConnectException,"Non HTTP response message: Connect to localhost:8000 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Connection refused (Connection refused)",Full Load 1-2,text,false,,2673,0,1,1,http://localhost:8000/categories,0,0,1
-1764001592605,1,GET /users,Non HTTP response code: org.apache.http.conn.HttpHostConnectException,"Non HTTP response message: Connect to localhost:8000 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Connection refused (Connection refused)",Full Load 1-2,text,false,,2673,0,1,1,http://localhost:8000/users,0,0,1
-1764001592606,1,GET /loans,Non HTTP response code: org.apache.http.conn.HttpHostConnectException,"Non HTTP response message: Connect to localhost:8000 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Connection refused (Connection refused)",Full Load 1-2,text,false,,2673,0,1,1,http://localhost:8000/loans,0,0,1
-1764001592607,1,POST /categories,Non HTTP response code: org.apache.http.conn.HttpHostConnectException,"Non HTTP response message: Connect to localhost:8000 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Connection refused (Connection refused)",Full Load 1-2,text,false,,2673,0,1,1,http://localhost:8000/categories,0,0,1
-1764001592608,1,POST /books,Non HTTP response code: org.apache.http.conn.HttpHostConnectException,"Non HTTP response message: Connect to localhost:8000 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Connection refused (Connection refused)",Full Load 1-2,text,false,,2673,0,1,1,http://localhost:8000/books,0,0,1
-1764001593594,1,POST Java /auth/register,Non HTTP response code: org.apache.http.conn.HttpHostConnectException,"Non HTTP response message: Connect to localhost:8080 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Connection refused (Connection refused)",Full Load 1-3,text,false,,2673,0,1,1,http://localhost:8080/auth/register,0,0,1
-1764001593595,1,POST Java /auth/login,Non HTTP response code: org.apache.http.conn.HttpHostConnectException,"Non HTTP response message: Connect to localhost:8080 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Connection refused (Connection refused)",Full Load 1-3,text,false,,2673,0,1,1,http://localhost:8080/auth/login,0,0,1
-1764001593596,1,GET Python /health,Non HTTP response code: org.apache.http.conn.HttpHostConnectException,"Non HTTP response message: Connect to localhost:8000 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Connection refused (Connection refused)",Full Load 1-3,text,false,,2673,0,1,1,http://localhost:8000/health,0,0,1
-1764001593597,1,GET /books,Non HTTP response code: org.apache.http.conn.HttpHostConnectException,"Non HTTP response message: Connect to localhost:8000 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Connection refused (Connection refused)",Full Load 1-3,text,false,,2673,0,1,1,http://localhost:8000/books,0,0,1
-1764001593598,1,GET /books/available,Non HTTP response code: org.apache.http.conn.HttpHostConnectException,"Non HTTP response message: Connect to localhost:8000 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Connection refused (Connection refused)",Full Load 1-3,text,false,,2673,0,1,1,http://localhost:8000/books/available,0,0,1
-1764001593600,0,GET /categories,Non HTTP response code: org.apache.http.conn.HttpHostConnectException,"Non HTTP response message: Connect to localhost:8000 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Connection refused (Connection refused)",Full Load 1-3,text,false,,2673,0,1,1,http://localhost:8000/categories,0,0,0
-1764001593601,0,GET /users,Non HTTP response code: org.apache.http.conn.HttpHostConnectException,"Non HTTP response message: Connect to localhost:8000 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Connection refused (Connection refused)",Full Load 1-3,text,false,,2673,0,1,1,http://localhost:8000/users,0,0,0
-1764001593601,1,GET /loans,Non HTTP response code: org.apache.http.conn.HttpHostConnectException,"Non HTTP response message: Connect to localhost:8000 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Connection refused (Connection refused)",Full Load 1-3,text,false,,2673,0,1,1,http://localhost:8000/loans,0,0,1
-1764001593602,1,POST /categories,Non HTTP response code: org.apache.http.conn.HttpHostConnectException,"Non HTTP response message: Connect to localhost:8000 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Connection refused (Connection refused)",Full Load 1-3,text,false,,2673,0,1,1,http://localhost:8000/categories,0,0,1
-1764001593603,1,POST /books,Non HTTP response code: org.apache.http.conn.HttpHostConnectException,"Non HTTP response message: Connect to localhost:8000 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Connection refused (Connection refused)",Full Load 1-3,text,false,,2673,0,1,1,http://localhost:8000/books,0,0,0
-1764001594594,1,POST Java /auth/register,Non HTTP response code: org.apache.http.conn.HttpHostConnectException,"Non HTTP response message: Connect to localhost:8080 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Connection refused (Connection refused)",Full Load 1-4,text,false,,2673,0,1,1,http://localhost:8080/auth/register,0,0,1
-1764001594595,1,POST Java /auth/login,Non HTTP response code: org.apache.http.conn.HttpHostConnectException,"Non HTTP response message: Connect to localhost:8080 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Connection refused (Connection refused)",Full Load 1-4,text,false,,2673,0,1,1,http://localhost:8080/auth/login,0,0,1
-1764001594597,0,GET Python /health,Non HTTP response code: org.apache.http.conn.HttpHostConnectException,"Non HTTP response message: Connect to localhost:8000 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Connection refused (Connection refused)",Full Load 1-4,text,false,,2673,0,1,1,http://localhost:8000/health,0,0,0
-1764001594598,0,GET /books,Non HTTP response code: org.apache.http.conn.HttpHostConnectException,"Non HTTP response message: Connect to localhost:8000 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Connection refused (Connection refused)",Full Load 1-4,text,false,,2673,0,1,1,http://localhost:8000/books,0,0,0
-1764001594598,1,GET /books/available,Non HTTP response code: org.apache.http.conn.HttpHostConnectException,"Non HTTP response message: Connect to localhost:8000 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Connection refused (Connection refused)",Full Load 1-4,text,false,,2673,0,1,1,http://localhost:8000/books/available,0,0,1
-1764001594599,1,GET /categories,Non HTTP response code: org.apache.http.conn.HttpHostConnectException,"Non HTTP response message: Connect to localhost:8000 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Connection refused (Connection refused)",Full Load 1-4,text,false,,2673,0,1,1,http://localhost:8000/categories,0,0,0
-1764001594600,0,GET /users,Non HTTP response code: org.apache.http.conn.HttpHostConnectException,"Non HTTP response message: Connect to localhost:8000 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Connection refused (Connection refused)",Full Load 1-4,text,false,,2673,0,1,1,http://localhost:8000/users,0,0,0
-1764001594601,0,GET /loans,Non HTTP response code: org.apache.http.conn.HttpHostConnectException,"Non HTTP response message: Connect to localhost:8000 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Connection refused (Connection refused)",Full Load 1-4,text,false,,2673,0,1,1,http://localhost:8000/loans,0,0,0
-1764001594601,1,POST /categories,Non HTTP response code: org.apache.http.conn.HttpHostConnectException,"Non HTTP response message: Connect to localhost:8000 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Connection refused (Connection refused)",Full Load 1-4,text,false,,2673,0,1,1,http://localhost:8000/categories,0,0,1
-1764001594602,1,POST /books,Non HTTP response code: org.apache.http.conn.HttpHostConnectException,"Non HTTP response message: Connect to localhost:8000 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Connection refused (Connection refused)",Full Load 1-4,text,false,,2673,0,1,1,http://localhost:8000/books,0,0,1
-1764001595594,1,POST Java /auth/register,Non HTTP response code: org.apache.http.conn.HttpHostConnectException,"Non HTTP response message: Connect to localhost:8080 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Connection refused (Connection refused)",Full Load 1-5,text,false,,2673,0,1,1,http://localhost:8080/auth/register,0,0,1
-1764001595596,0,POST Java /auth/login,Non HTTP response code: org.apache.http.conn.HttpHostConnectException,"Non HTTP response message: Connect to localhost:8080 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Connection refused (Connection refused)",Full Load 1-5,text,false,,2673,0,1,1,http://localhost:8080/auth/login,0,0,0
-1764001595597,1,GET Python /health,Non HTTP response code: org.apache.http.conn.HttpHostConnectException,"Non HTTP response message: Connect to localhost:8000 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Connection refused (Connection refused)",Full Load 1-5,text,false,,2673,0,1,1,http://localhost:8000/health,0,0,1
-1764001595598,0,GET /books,Non HTTP response code: org.apache.http.conn.HttpHostConnectException,"Non HTTP response message: Connect to localhost:8000 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Connection refused (Connection refused)",Full Load 1-5,text,false,,2673,0,1,1,http://localhost:8000/books,0,0,0
-1764001595599,0,GET /books/available,Non HTTP response code: org.apache.http.conn.HttpHostConnectException,"Non HTTP response message: Connect to localhost:8000 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Connection refused (Connection refused)",Full Load 1-5,text,false,,2673,0,1,1,http://localhost:8000/books/available,0,0,0
-1764001595599,1,GET /categories,Non HTTP response code: org.apache.http.conn.HttpHostConnectException,"Non HTTP response message: Connect to localhost:8000 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Connection refused (Connection refused)",Full Load 1-5,text,false,,2673,0,1,1,http://localhost:8000/categories,0,0,1
-1764001595600,1,GET /users,Non HTTP response code: org.apache.http.conn.HttpHostConnectException,"Non HTTP response message: Connect to localhost:8000 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Connection refused (Connection refused)",Full Load 1-5,text,false,,2673,0,1,1,http://localhost:8000/users,0,0,1
-1764001595602,0,GET /loans,Non HTTP response code: org.apache.http.conn.HttpHostConnectException,"Non HTTP response message: Connect to localhost:8000 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Connection refused (Connection refused)",Full Load 1-5,text,false,,2673,0,1,1,http://localhost:8000/loans,0,0,0
-1764001595602,1,POST /categories,Non HTTP response code: org.apache.http.conn.HttpHostConnectException,"Non HTTP response message: Connect to localhost:8000 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Connection refused (Connection refused)",Full Load 1-5,text,false,,2673,0,1,1,http://localhost:8000/categories,0,0,1
-1764001595604,1,POST /books,Non HTTP response code: org.apache.http.conn.HttpHostConnectException,"Non HTTP response message: Connect to localhost:8000 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Connection refused (Connection refused)",Full Load 1-5,text,false,,2673,0,1,1,http://localhost:8000/books,0,0,1
+1764452422094,52,POST Java /auth/register,403,,Full Load 1-1,,false,,380,195,1,1,http://host.docker.internal:8080/auth/register,48,0,34
+1764452422148,8,POST Java /auth/login,403,,Full Load 1-1,,false,,380,192,1,1,http://host.docker.internal:8080/auth/login,8,0,0
+1764452422157,5,GET Python /health,200,OK,Full Load 1-1,text,true,,145,168,1,1,http://host.docker.internal:8000/health,5,0,2
+1764452422162,10,GET /books,200,OK,Full Load 1-1,text,true,,477,335,1,1,http://host.docker.internal:8000/books/,3,0,0
+1764452422162,3,GET /books-0,307,Temporary Redirect,Full Load 1-1,,true,,159,167,1,1,http://host.docker.internal:8000/books,3,0,0
+1764452422167,5,GET /books-1,200,OK,Full Load 1-1,text,true,,318,168,1,1,http://host.docker.internal:8000/books/,5,0,0
+1764452422172,5,GET /books/available,200,OK,Full Load 1-1,text,true,,318,177,1,1,http://host.docker.internal:8000/books/available,5,0,0
+1764452422178,7,GET /categories,200,OK,Full Load 1-1,text,true,,1144,345,1,1,http://host.docker.internal:8000/categories/,2,0,0
+1764452422178,2,GET /categories-0,307,Temporary Redirect,Full Load 1-1,,true,,164,172,1,1,http://host.docker.internal:8000/categories,2,0,0
+1764452422181,4,GET /categories-1,200,OK,Full Load 1-1,text,true,,980,173,1,1,http://host.docker.internal:8000/categories/,4,0,0
+1764452422186,5,GET /users,403,Forbidden,Full Load 1-1,text,false,,321,335,1,1,http://host.docker.internal:8000/users/,2,0,0
+1764452422186,2,GET /users-0,307,Temporary Redirect,Full Load 1-1,,true,,159,167,1,1,http://host.docker.internal:8000/users,2,0,0
+1764452422188,3,GET /users-1,403,Forbidden,Full Load 1-1,text,false,,162,168,1,1,http://host.docker.internal:8000/users/,3,0,0
+1764452422192,7,GET /loans,403,Forbidden,Full Load 1-1,text,false,,321,335,1,1,http://host.docker.internal:8000/loans/,3,0,0
+1764452422192,3,GET /loans-0,307,Temporary Redirect,Full Load 1-1,,true,,159,167,1,1,http://host.docker.internal:8000/loans,3,0,0
+1764452422195,4,GET /loans-1,403,Forbidden,Full Load 1-1,text,false,,162,168,1,1,http://host.docker.internal:8000/loans/,4,0,0
+1764452422199,3,POST /categories,307,Temporary Redirect,Full Load 1-1,,true,,164,192,1,1,http://host.docker.internal:8000/categories,3,0,0
+1764452422202,3,POST /books,307,Temporary Redirect,Full Load 1-1,,true,,159,187,1,1,http://host.docker.internal:8000/books,3,0,0
+1764452423011,8,POST Java /auth/register,403,,Full Load 1-2,,false,,380,195,1,1,http://host.docker.internal:8080/auth/register,8,0,2
+1764452423019,5,POST Java /auth/login,403,,Full Load 1-2,,false,,380,192,1,1,http://host.docker.internal:8080/auth/login,5,0,0
+1764452423025,5,GET Python /health,200,OK,Full Load 1-2,text,true,,145,168,1,1,http://host.docker.internal:8000/health,5,0,2
+1764452423030,7,GET /books,200,OK,Full Load 1-2,text,true,,477,335,1,1,http://host.docker.internal:8000/books/,3,0,0
+1764452423030,3,GET /books-0,307,Temporary Redirect,Full Load 1-2,,true,,159,167,1,1,http://host.docker.internal:8000/books,3,0,0
+1764452423033,4,GET /books-1,200,OK,Full Load 1-2,text,true,,318,168,1,1,http://host.docker.internal:8000/books/,4,0,0
+1764452423037,5,GET /books/available,200,OK,Full Load 1-2,text,true,,318,177,1,1,http://host.docker.internal:8000/books/available,5,0,0
+1764452423042,7,GET /categories,200,OK,Full Load 1-2,text,true,,1144,345,1,1,http://host.docker.internal:8000/categories/,2,0,0
+1764452423042,2,GET /categories-0,307,Temporary Redirect,Full Load 1-2,,true,,164,172,1,1,http://host.docker.internal:8000/categories,2,0,0
+1764452423044,5,GET /categories-1,200,OK,Full Load 1-2,text,true,,980,173,1,1,http://host.docker.internal:8000/categories/,5,0,0
+1764452423049,6,GET /users,403,Forbidden,Full Load 1-2,text,false,,321,335,1,1,http://host.docker.internal:8000/users/,3,0,0
+1764452423049,3,GET /users-0,307,Temporary Redirect,Full Load 1-2,,true,,159,167,1,1,http://host.docker.internal:8000/users,3,0,0
+1764452423052,3,GET /users-1,403,Forbidden,Full Load 1-2,text,false,,162,168,1,1,http://host.docker.internal:8000/users/,3,0,0
+1764452423056,6,GET /loans,403,Forbidden,Full Load 1-2,text,false,,321,335,1,1,http://host.docker.internal:8000/loans/,3,0,0
+1764452423056,3,GET /loans-0,307,Temporary Redirect,Full Load 1-2,,true,,159,167,1,1,http://host.docker.internal:8000/loans,3,0,0
+1764452423059,3,GET /loans-1,403,Forbidden,Full Load 1-2,text,false,,162,168,1,1,http://host.docker.internal:8000/loans/,3,0,0
+1764452423062,3,POST /categories,307,Temporary Redirect,Full Load 1-2,,true,,164,192,1,1,http://host.docker.internal:8000/categories,3,0,0
+1764452423066,2,POST /books,307,Temporary Redirect,Full Load 1-2,,true,,159,187,1,1,http://host.docker.internal:8000/books,2,0,0
+1764452424010,7,POST Java /auth/register,403,,Full Load 1-3,,false,,380,195,1,1,http://host.docker.internal:8080/auth/register,7,0,2
+1764452424018,6,POST Java /auth/login,403,,Full Load 1-3,,false,,380,192,1,1,http://host.docker.internal:8080/auth/login,6,0,0
+1764452424025,4,GET Python /health,200,OK,Full Load 1-3,text,true,,145,168,1,1,http://host.docker.internal:8000/health,4,0,2
+1764452424030,7,GET /books,200,OK,Full Load 1-3,text,true,,477,335,1,1,http://host.docker.internal:8000/books/,2,0,0
+1764452424030,2,GET /books-0,307,Temporary Redirect,Full Load 1-3,,true,,159,167,1,1,http://host.docker.internal:8000/books,2,0,0
+1764452424033,4,GET /books-1,200,OK,Full Load 1-3,text,true,,318,168,1,1,http://host.docker.internal:8000/books/,4,0,0
+1764452424038,4,GET /books/available,200,OK,Full Load 1-3,text,true,,318,177,1,1,http://host.docker.internal:8000/books/available,4,0,0
+1764452424042,7,GET /categories,200,OK,Full Load 1-3,text,true,,1144,345,1,1,http://host.docker.internal:8000/categories/,3,0,0
+1764452424042,3,GET /categories-0,307,Temporary Redirect,Full Load 1-3,,true,,164,172,1,1,http://host.docker.internal:8000/categories,3,0,0
+1764452424045,4,GET /categories-1,200,OK,Full Load 1-3,text,true,,980,173,1,1,http://host.docker.internal:8000/categories/,4,0,0
+1764452424050,5,GET /users,403,Forbidden,Full Load 1-3,text,false,,321,335,1,1,http://host.docker.internal:8000/users/,2,0,0
+1764452424050,2,GET /users-0,307,Temporary Redirect,Full Load 1-3,,true,,159,167,1,1,http://host.docker.internal:8000/users,2,0,0
+1764452424052,3,GET /users-1,403,Forbidden,Full Load 1-3,text,false,,162,168,1,1,http://host.docker.internal:8000/users/,3,0,0
+1764452424056,5,GET /loans,403,Forbidden,Full Load 1-3,text,false,,321,335,1,1,http://host.docker.internal:8000/loans/,2,0,0
+1764452424056,2,GET /loans-0,307,Temporary Redirect,Full Load 1-3,,true,,159,167,1,1,http://host.docker.internal:8000/loans,2,0,0
+1764452424058,3,GET /loans-1,403,Forbidden,Full Load 1-3,text,false,,162,168,1,1,http://host.docker.internal:8000/loans/,3,0,0
+1764452424061,3,POST /categories,307,Temporary Redirect,Full Load 1-3,,true,,164,192,1,1,http://host.docker.internal:8000/categories,3,0,0
+1764452424065,2,POST /books,307,Temporary Redirect,Full Load 1-3,,true,,159,187,1,1,http://host.docker.internal:8000/books,2,0,0
+1764452425009,7,POST Java /auth/register,403,,Full Load 1-4,,false,,380,195,1,1,http://host.docker.internal:8080/auth/register,7,0,2
+1764452425017,5,POST Java /auth/login,403,,Full Load 1-4,,false,,380,192,1,1,http://host.docker.internal:8080/auth/login,5,0,0
+1764452425023,5,GET Python /health,200,OK,Full Load 1-4,text,true,,145,168,1,1,http://host.docker.internal:8000/health,4,0,2
+1764452425028,6,GET /books,200,OK,Full Load 1-4,text,true,,477,335,1,1,http://host.docker.internal:8000/books/,2,0,0
+1764452425028,2,GET /books-0,307,Temporary Redirect,Full Load 1-4,,true,,159,167,1,1,http://host.docker.internal:8000/books,2,0,0
+1764452425030,4,GET /books-1,200,OK,Full Load 1-4,text,true,,318,168,1,1,http://host.docker.internal:8000/books/,4,0,0
+1764452425035,4,GET /books/available,200,OK,Full Load 1-4,text,true,,318,177,1,1,http://host.docker.internal:8000/books/available,4,0,0
+1764452425040,6,GET /categories,200,OK,Full Load 1-4,text,true,,1144,345,1,1,http://host.docker.internal:8000/categories/,2,0,0
+1764452425040,2,GET /categories-0,307,Temporary Redirect,Full Load 1-4,,true,,164,172,1,1,http://host.docker.internal:8000/categories,2,0,0
+1764452425042,4,GET /categories-1,200,OK,Full Load 1-4,text,true,,980,173,1,1,http://host.docker.internal:8000/categories/,4,0,0
+1764452425047,6,GET /users,403,Forbidden,Full Load 1-4,text,false,,321,335,1,1,http://host.docker.internal:8000/users/,2,0,0
+1764452425047,2,GET /users-0,307,Temporary Redirect,Full Load 1-4,,true,,159,167,1,1,http://host.docker.internal:8000/users,2,0,0
+1764452425049,4,GET /users-1,403,Forbidden,Full Load 1-4,text,false,,162,168,1,1,http://host.docker.internal:8000/users/,4,0,0
+1764452425053,5,GET /loans,403,Forbidden,Full Load 1-4,text,false,,321,335,1,1,http://host.docker.internal:8000/loans/,2,0,0
+1764452425053,2,GET /loans-0,307,Temporary Redirect,Full Load 1-4,,true,,159,167,1,1,http://host.docker.internal:8000/loans,2,0,0
+1764452425055,3,GET /loans-1,403,Forbidden,Full Load 1-4,text,false,,162,168,1,1,http://host.docker.internal:8000/loans/,3,0,0
+1764452425059,2,POST /categories,307,Temporary Redirect,Full Load 1-4,,true,,164,192,1,1,http://host.docker.internal:8000/categories,2,0,0
+1764452425062,2,POST /books,307,Temporary Redirect,Full Load 1-4,,true,,159,187,1,1,http://host.docker.internal:8000/books,2,0,0
+1764452426009,7,POST Java /auth/register,403,,Full Load 1-5,,false,,380,195,1,1,http://host.docker.internal:8080/auth/register,7,0,2
+1764452426017,5,POST Java /auth/login,403,,Full Load 1-5,,false,,380,192,1,1,http://host.docker.internal:8080/auth/login,5,0,0
+1764452426023,5,GET Python /health,200,OK,Full Load 1-5,text,true,,145,168,1,1,http://host.docker.internal:8000/health,5,0,2
+1764452426028,7,GET /books,200,OK,Full Load 1-5,text,true,,477,335,1,1,http://host.docker.internal:8000/books/,2,0,0
+1764452426028,2,GET /books-0,307,Temporary Redirect,Full Load 1-5,,true,,159,167,1,1,http://host.docker.internal:8000/books,2,0,0
+1764452426030,5,GET /books-1,200,OK,Full Load 1-5,text,true,,318,168,1,1,http://host.docker.internal:8000/books/,5,0,0
+1764452426035,5,GET /books/available,200,OK,Full Load 1-5,text,true,,318,177,1,1,http://host.docker.internal:8000/books/available,5,0,0
+1764452426040,8,GET /categories,200,OK,Full Load 1-5,text,true,,1144,345,1,1,http://host.docker.internal:8000/categories/,2,0,0
+1764452426040,2,GET /categories-0,307,Temporary Redirect,Full Load 1-5,,true,,164,172,1,1,http://host.docker.internal:8000/categories,2,0,0
+1764452426043,5,GET /categories-1,200,OK,Full Load 1-5,text,true,,980,173,1,1,http://host.docker.internal:8000/categories/,4,0,0
+1764452426048,6,GET /users,403,Forbidden,Full Load 1-5,text,false,,321,335,1,1,http://host.docker.internal:8000/users/,2,0,0
+1764452426048,2,GET /users-0,307,Temporary Redirect,Full Load 1-5,,true,,159,167,1,1,http://host.docker.internal:8000/users,2,0,0
+1764452426050,4,GET /users-1,403,Forbidden,Full Load 1-5,text,false,,162,168,1,1,http://host.docker.internal:8000/users/,4,0,0
+1764452426054,7,GET /loans,403,Forbidden,Full Load 1-5,text,false,,321,335,1,1,http://host.docker.internal:8000/loans/,3,0,0
+1764452426054,3,GET /loans-0,307,Temporary Redirect,Full Load 1-5,,true,,159,167,1,1,http://host.docker.internal:8000/loans,3,0,0
+1764452426057,4,GET /loans-1,403,Forbidden,Full Load 1-5,text,false,,162,168,1,1,http://host.docker.internal:8000/loans/,4,0,0
+1764452426061,2,POST /categories,307,Temporary Redirect,Full Load 1-5,,true,,164,192,1,1,http://host.docker.internal:8000/categories,2,0,0
+1764452426064,2,POST /books,307,Temporary Redirect,Full Load 1-5,,true,,159,187,1,1,http://host.docker.internal:8000/books,2,0,0
