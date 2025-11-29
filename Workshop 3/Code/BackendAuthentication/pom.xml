@@ -23,6 +23,12 @@
     </properties>
 
     <dependencies>
+        <!-- Agrega esto en la sección <dependencies> -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
+        </dependency>
 
         <!-- Spring Boot Starters -->
         <dependency>
