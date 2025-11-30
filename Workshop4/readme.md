@@ -100,15 +100,14 @@ Results stored in:
 
 ---
 
-### 📸 **JUnit Evidence**
+### 📸 JUnit Evidence
 
-> Inserte aquí la imagen con resultados de JUnit
-> `![junit-results](PATH/junit_results.png)`
+![junit-results](imgs/junit.png)
 
-### 📸 **PyTest Evidence**
 
-> Inserte aquí la imagen con resultados de PyTest
-> `![pytest-results](PATH/pytest_results.png)`
+### 📸 PyTest Evidence
+
+![pytest-results](imgs/pytest.png)
 
 ---
 
@@ -137,29 +136,28 @@ Results in:
 
 ---
 
-### 📸 **JMeter Evidence #1**
+### 📸 JMeter Evidence #1
 
-> Inserte aquí imagen JMeter dashboard #1
-> `![jmeter1](PATH/jmeter_result_1.png)`
+![jmeter1](imgs/jmeter1.png)
 
-### 📸 **JMeter Evidence #2**
 
-> Inserte aquí imagen JMeter dashboard #2
-> `![jmeter2](PATH/jmeter_result_2.png)`
+### 📸 JMeter Evidence #2
+
+![jmeter2](imgs/jmeter2.png)
+
 
 ---
 
 ## 🖥️ 4. User Interface Screens
 
-### 📸 **UI Evidence #1**
+### 📸 UI Evidence #1
 
-> Inserte aquí imagen de interfaz #1
-> `![ui1](PATH/ui_1.png)`
+![interface1](imgs/interface1.png)
 
-### 📸 **UI Evidence #2**
 
-> Inserte aquí imagen de interfaz #2
-> `![ui2](PATH/ui_2.png)`
+### 📸 UI Evidence #2
+
+![interface2](imgs/interface2.png)
 
 ---
 
@@ -179,10 +177,9 @@ Workflow includes:
 
 ---
 
-### 📸 **GitHub CI/CD Evidence**
+### 📸 GitHub CI/CD Evidence
 
-> Inserte aquí imagen del workflow en GitHub Actions
-> `![github-ci](PATH/github_ci.png)`
+![cicd](imgs/cicd.png)
 
 ---
 
@@ -266,6 +263,7 @@ Actions tab → latest workflow
 * GitHub Actions
 
 ---
+
 
 
 
