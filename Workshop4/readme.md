@@ -1,18 +1,5 @@
 # Workshop 4 - Deployment, Acceptance Testing & Stress Testing
 
-## 📋 Overview
-
-Workshop 4 contains all deliverables for deployment, acceptance testing (Cucumber/Behave), and stress testing (JMeter) of the BookWise application. This includes:
-
-- ✅ **Dockerfiles** for all three components (Java Backend, Python Backend, Frontend)
-- ✅ **docker-compose.yml** to orchestrate all services
-- ✅ **Cucumber features & step definitions** for acceptance testing (Behave framework)
-- ✅ **JMeter test plans** (JMX) with stress testing results
-- ✅ **GitHub Actions CI/CD workflow** for automated builds and testing
-- ✅ **This README** with complete instructions
-
----
-
 ## 🐳 1. Docker & docker-compose
 
 ### Dockerfiles Location
@@ -547,3 +534,4 @@ Ensure services are accessible. If running JMeter in Docker, use:
 
 **Last Updated:** November 29, 2025
 **Status:** ✅ All deliverables complete and tested
+
