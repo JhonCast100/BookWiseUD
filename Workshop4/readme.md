@@ -63,10 +63,9 @@ docker-compose down -v
 
 ---
 
-### 📸 **Docker Evidence**
+### 📸 Docker Evidence
 
-> `![docker-evidence](Workshop4/imgs/docker.jpg)`
-
+![docker-evidence](imgs/docker.jpg)
 ---
 
 ## 🥒 2. Cucumber Acceptance Testing (Behave)
@@ -267,5 +266,6 @@ Actions tab → latest workflow
 * GitHub Actions
 
 ---
+
 
 
