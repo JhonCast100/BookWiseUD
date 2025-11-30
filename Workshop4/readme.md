@@ -138,7 +138,7 @@ Results in:
 
 ### 📸 JMeter Evidence #1
 
-![jmeter1](imgs/jmeter1.jpg)
+![jmeter1](imgs/jmeter1.png)
 
 
 ### 📸 JMeter Evidence #2
@@ -263,6 +263,7 @@ Actions tab → latest workflow
 * GitHub Actions
 
 ---
+
 
 
 
