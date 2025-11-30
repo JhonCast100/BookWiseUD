@@ -65,8 +65,7 @@ docker-compose down -v
 
 ### 📸 **Docker Evidence**
 
-> Inserte aquí la imagen de Docker (build/containers)
-> `![docker-evidence](PATH/docker_evidence.png)`
+> `![docker-evidence](Workshop4/imgs/docker.jpg)`
 
 ---
 
@@ -268,4 +267,5 @@ Actions tab → latest workflow
 * GitHub Actions
 
 ---
+
 
