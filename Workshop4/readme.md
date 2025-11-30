@@ -2,7 +2,6 @@
 
 # Workshop 4 - Deployment, Acceptance Testing & Stress Testing
 
-*(Incluye espacios para evidencias en imágenes)*
 
 ---
 
@@ -269,3 +268,4 @@ Actions tab → latest workflow
 * GitHub Actions
 
 ---
+
