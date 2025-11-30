@@ -102,12 +102,12 @@ Results stored in:
 
 ### 📸 JUnit Evidence
 
-![junit](imgs/junit.png)
+![junit](imgs/junit.jpg)
 
 
 ### 📸 PyTest Evidence
 
-![pytest](imgs/pytest.png)
+![pytest](imgs/pytest.jpg)
 
 ---
 
@@ -138,12 +138,12 @@ Results in:
 
 ### 📸 JMeter Evidence #1
 
-![jmeter1](imgs/jmeter1.png)
+![jmeter1](imgs/jmeter1.jpg)
 
 
 ### 📸 JMeter Evidence #2
 
-![jmeter2](imgs/jmeter2.png)
+![jmeter2](imgs/jmeter2.jpg)
 
 
 ---
@@ -152,12 +152,12 @@ Results in:
 
 ### 📸 UI Evidence #1
 
-![interface1](imgs/interface1.png)
+![interface1](imgs/interface1.jpg)
 
 
 ### 📸 UI Evidence #2
 
-![interface2](imgs/interface2.png)
+![interface2](imgs/interface2.jpg)
 
 ---
 
@@ -179,7 +179,7 @@ Workflow includes:
 
 ### 📸 GitHub CI/CD Evidence
 
-![cicd](imgs/cicd.png)
+![cicd](imgs/cicd.jpg)
 
 ---
 
@@ -263,6 +263,7 @@ Actions tab → latest workflow
 * GitHub Actions
 
 ---
+
 
 
 
