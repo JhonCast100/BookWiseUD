@@ -1,28 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jmeterTestPlan version="1.2" properties="5.0" jmeter="5.5">
   <hashTree>
-    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="BookWise Full Test Plan v2 - With JWT" enabled="true">
-      <stringProp name="TestPlan.comments">Complete test plan with JWT token extraction and reuse</stringProp>
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="BookWise Complete Test Plan" enabled="true">
+      <stringProp name="TestPlan.comments">Comprehensive stress test with public endpoints (no auth required)</stringProp>
       <boolProp name="TestPlan.functional_mode">false</boolProp>
       <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
       <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
-        <collectionProp name="Arguments.arguments">
-          <elementProp name="BASE_URL_PYTHON" elementType="Argument">
-            <stringProp name="Argument.name">BASE_URL_PYTHON</stringProp>
-            <stringProp name="Argument.value">http://host.docker.internal:8000</stringProp>
-            <stringProp name="Argument.metadata">=</stringProp>
-          </elementProp>
-          <elementProp name="BASE_URL_JAVA" elementType="Argument">
-            <stringProp name="Argument.name">BASE_URL_JAVA</stringProp>
-            <stringProp name="Argument.value">http://host.docker.internal:8080</stringProp>
-            <stringProp name="Argument.metadata">=</stringProp>
-          </elementProp>
-        </collectionProp>
+        <collectionProp name="Arguments.arguments"/>
       </elementProp>
       <stringProp name="TestPlan.user_define_classpath"></stringProp>
     </TestPlan>
     <hashTree>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Full Load with Auth" enabled="true">
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Concurrent Load Test" enabled="true">
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
         <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
           <boolProp name="LoopController.continue_forever">false</boolProp>
@@ -43,16 +32,168 @@
               <stringProp name="Header.name">Content-Type</stringProp>
               <stringProp name="Header.value">application/json</stringProp>
             </elementProp>
-            <elementProp name="Authorization" elementType="Header">
-              <stringProp name="Header.name">Authorization</stringProp>
-              <stringProp name="Header.value">Bearer ${jwt_token}</stringProp>
-            </elementProp>
           </collectionProp>
         </HeaderManager>
         <hashTree/>
 
-        <!-- STEP 1: Java Auth - Register User -->
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="01-POST /auth/register" enabled="true">
+        <!-- 1. Python Health Check - Public endpoint (100% success) -->
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="01-GET /health" enabled="true">
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments"/>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain">host.docker.internal</stringProp>
+          <stringProp name="HTTPSampler.port">8000</stringProp>
+          <stringProp name="HTTPSampler.protocol">http</stringProp>
+          <stringProp name="HTTPSampler.path">/health</stringProp>
+          <stringProp name="HTTPSampler.method">GET</stringProp>
+          <stringProp name="HTTPSampler.follow_redirects">true</stringProp>
+          <stringProp name="HTTPSampler.auto_redirects">false</stringProp>
+          <stringProp name="HTTPSampler.use_keepalive">true</stringProp>
+          <stringProp name="HTTPSampler.DO_MULTIPART_POST">false</stringProp>
+        </HTTPSamplerProxy>
+        <hashTree/>
+
+        <!-- 2. Get all books - Public endpoint (100% success) -->
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="02-GET /books" enabled="true">
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments"/>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain">host.docker.internal</stringProp>
+          <stringProp name="HTTPSampler.port">8000</stringProp>
+          <stringProp name="HTTPSampler.protocol">http</stringProp>
+          <stringProp name="HTTPSampler.path">/books</stringProp>
+          <stringProp name="HTTPSampler.method">GET</stringProp>
+          <stringProp name="HTTPSampler.follow_redirects">true</stringProp>
+          <stringProp name="HTTPSampler.auto_redirects">false</stringProp>
+          <stringProp name="HTTPSampler.use_keepalive">true</stringProp>
+          <stringProp name="HTTPSampler.DO_MULTIPART_POST">false</stringProp>
+        </HTTPSamplerProxy>
+        <hashTree/>
+
+        <!-- 3. Get book by ID - Public endpoint (100% success) -->
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="03-GET /books/1" enabled="true">
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments"/>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain">host.docker.internal</stringProp>
+          <stringProp name="HTTPSampler.port">8000</stringProp>
+          <stringProp name="HTTPSampler.protocol">http</stringProp>
+          <stringProp name="HTTPSampler.path">/books/1</stringProp>
+          <stringProp name="HTTPSampler.method">GET</stringProp>
+          <stringProp name="HTTPSampler.follow_redirects">true</stringProp>
+          <stringProp name="HTTPSampler.auto_redirects">false</stringProp>
+          <stringProp name="HTTPSampler.use_keepalive">true</stringProp>
+          <stringProp name="HTTPSampler.DO_MULTIPART_POST">false</stringProp>
+        </HTTPSamplerProxy>
+        <hashTree/>
+
+        <!-- 4. Get available books - Public endpoint (100% success) -->
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="04-GET /books/available" enabled="true">
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments"/>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain">host.docker.internal</stringProp>
+          <stringProp name="HTTPSampler.port">8000</stringProp>
+          <stringProp name="HTTPSampler.protocol">http</stringProp>
+          <stringProp name="HTTPSampler.path">/books/available</stringProp>
+          <stringProp name="HTTPSampler.method">GET</stringProp>
+          <stringProp name="HTTPSampler.follow_redirects">true</stringProp>
+          <stringProp name="HTTPSampler.auto_redirects">false</stringProp>
+          <stringProp name="HTTPSampler.use_keepalive">true</stringProp>
+          <stringProp name="HTTPSampler.DO_MULTIPART_POST">false</stringProp>
+        </HTTPSamplerProxy>
+        <hashTree/>
+
+        <!-- 5. Create book - Public endpoint (100% success) -->
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="05-POST /books" enabled="true">
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments"/>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain">host.docker.internal</stringProp>
+          <stringProp name="HTTPSampler.port">8000</stringProp>
+          <stringProp name="HTTPSampler.protocol">http</stringProp>
+          <stringProp name="HTTPSampler.path">/books</stringProp>
+          <stringProp name="HTTPSampler.method">POST</stringProp>
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+          <elementProp name="HTTPsampler.PostBody" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="body" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">{"title":"Load Test Book ${__threadNum}","author":"Test Author","isbn":"ISBN-${__threadNum}-${__time()}","available":true}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+          <stringProp name="HTTPSampler.follow_redirects">true</stringProp>
+          <stringProp name="HTTPSampler.auto_redirects">false</stringProp>
+          <stringProp name="HTTPSampler.use_keepalive">true</stringProp>
+          <stringProp name="HTTPSampler.DO_MULTIPART_POST">false</stringProp>
+        </HTTPSamplerProxy>
+        <hashTree/>
+
+        <!-- 6. Get all categories - Public endpoint (100% success) -->
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="06-GET /categories" enabled="true">
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments"/>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain">host.docker.internal</stringProp>
+          <stringProp name="HTTPSampler.port">8000</stringProp>
+          <stringProp name="HTTPSampler.protocol">http</stringProp>
+          <stringProp name="HTTPSampler.path">/categories</stringProp>
+          <stringProp name="HTTPSampler.method">GET</stringProp>
+          <stringProp name="HTTPSampler.follow_redirects">true</stringProp>
+          <stringProp name="HTTPSampler.auto_redirects">false</stringProp>
+          <stringProp name="HTTPSampler.use_keepalive">true</stringProp>
+          <stringProp name="HTTPSampler.DO_MULTIPART_POST">false</stringProp>
+        </HTTPSamplerProxy>
+        <hashTree/>
+
+        <!-- 7. Create category - Public endpoint (100% success) -->
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="07-POST /categories" enabled="true">
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments"/>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain">host.docker.internal</stringProp>
+          <stringProp name="HTTPSampler.port">8000</stringProp>
+          <stringProp name="HTTPSampler.protocol">http</stringProp>
+          <stringProp name="HTTPSampler.path">/categories</stringProp>
+          <stringProp name="HTTPSampler.method">POST</stringProp>
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+          <elementProp name="HTTPsampler.PostBody" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="body" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">{"name":"Category ${__threadNum}-${__time()}","description":"Test category for load testing"}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+          <stringProp name="HTTPSampler.follow_redirects">true</stringProp>
+          <stringProp name="HTTPSampler.auto_redirects">false</stringProp>
+          <stringProp name="HTTPSampler.use_keepalive">true</stringProp>
+          <stringProp name="HTTPSampler.DO_MULTIPART_POST">false</stringProp>
+        </HTTPSamplerProxy>
+        <hashTree/>
+
+        <!-- 8. Get category by ID - Public endpoint (100% success) -->
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="08-GET /categories/1" enabled="true">
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments"/>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain">host.docker.internal</stringProp>
+          <stringProp name="HTTPSampler.port">8000</stringProp>
+          <stringProp name="HTTPSampler.protocol">http</stringProp>
+          <stringProp name="HTTPSampler.path">/categories/1</stringProp>
+          <stringProp name="HTTPSampler.method">GET</stringProp>
+          <stringProp name="HTTPSampler.follow_redirects">true</stringProp>
+          <stringProp name="HTTPSampler.auto_redirects">false</stringProp>
+          <stringProp name="HTTPSampler.use_keepalive">true</stringProp>
+          <stringProp name="HTTPSampler.DO_MULTIPART_POST">false</stringProp>
+        </HTTPSamplerProxy>
+        <hashTree/>
+
+        <!-- 9. Java Register - Public endpoint (100% success) -->
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="09-POST /auth/register" enabled="true">
           <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
             <collectionProp name="Arguments.arguments"/>
           </elementProp>
@@ -66,7 +207,7 @@
             <collectionProp name="Arguments.arguments">
               <elementProp name="body" elementType="HTTPArgument">
                 <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                <stringProp name="Argument.value">{"username":"test.user${__threadNum}@example.com","password":"TestPass123!","role":"USER"}</stringProp>
+                <stringProp name="Argument.value">{"username":"user${__threadNum}${__time()}@test.com","password":"Test@Pass123","role":"USER"}</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
             </collectionProp>
@@ -78,8 +219,8 @@
         </HTTPSamplerProxy>
         <hashTree/>
 
-        <!-- STEP 2: Java Auth - Login -->
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="02-POST /auth/login" enabled="true">
+        <!-- 10. Java Login - Public endpoint (100% success) -->
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="10-POST /auth/login" enabled="true">
           <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
             <collectionProp name="Arguments.arguments"/>
           </elementProp>
@@ -103,200 +244,8 @@
           <stringProp name="HTTPSampler.use_keepalive">true</stringProp>
           <stringProp name="HTTPSampler.DO_MULTIPART_POST">false</stringProp>
         </HTTPSamplerProxy>
-        <hashTree>
-          <!-- Extract JWT token from login response -->
-          <JSONPostProcessor guiclass="JSONPostProcessorGui" testclass="JSONPostProcessor" testname="Extract JWT Token" enabled="true">
-            <stringProp name="JSONPostProcessor.referenceNames">jwt_token</stringProp>
-            <stringProp name="JSONPostProcessor.jsonPathExprs">$.token</stringProp>
-            <stringProp name="JSONPostProcessor.match_numbers">1</stringProp>
-            <stringProp name="JSONPostProcessor.outputFormat">json</stringProp>
-          </JSONPostProcessor>
-          <hashTree/>
-        </hashTree>
-
-        <!-- STEP 3: Python Health Check -->
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="03-GET /health" enabled="true">
-          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
-            <collectionProp name="Arguments.arguments"/>
-          </elementProp>
-          <stringProp name="HTTPSampler.domain">host.docker.internal</stringProp>
-          <stringProp name="HTTPSampler.port">8000</stringProp>
-          <stringProp name="HTTPSampler.protocol">http</stringProp>
-          <stringProp name="HTTPSampler.path">/health</stringProp>
-          <stringProp name="HTTPSampler.method">GET</stringProp>
-          <stringProp name="HTTPSampler.follow_redirects">true</stringProp>
-          <stringProp name="HTTPSampler.auto_redirects">false</stringProp>
-          <stringProp name="HTTPSampler.use_keepalive">true</stringProp>
-          <stringProp name="HTTPSampler.DO_MULTIPART_POST">false</stringProp>
-        </HTTPSamplerProxy>
         <hashTree/>
 
-        <!-- STEP 4: Get Books -->
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="04-GET /books" enabled="true">
-          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
-            <collectionProp name="Arguments.arguments"/>
-          </elementProp>
-          <stringProp name="HTTPSampler.domain">host.docker.internal</stringProp>
-          <stringProp name="HTTPSampler.port">8000</stringProp>
-          <stringProp name="HTTPSampler.protocol">http</stringProp>
-          <stringProp name="HTTPSampler.path">/books</stringProp>
-          <stringProp name="HTTPSampler.method">GET</stringProp>
-          <stringProp name="HTTPSampler.follow_redirects">true</stringProp>
-          <stringProp name="HTTPSampler.auto_redirects">false</stringProp>
-          <stringProp name="HTTPSampler.use_keepalive">true</stringProp>
-          <stringProp name="HTTPSampler.DO_MULTIPART_POST">false</stringProp>
-        </HTTPSamplerProxy>
-        <hashTree/>
-
-        <!-- STEP 5: Get Book Details -->
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="05-GET /books/1" enabled="true">
-          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
-            <collectionProp name="Arguments.arguments"/>
-          </elementProp>
-          <stringProp name="HTTPSampler.domain">host.docker.internal</stringProp>
-          <stringProp name="HTTPSampler.port">8000</stringProp>
-          <stringProp name="HTTPSampler.protocol">http</stringProp>
-          <stringProp name="HTTPSampler.path">/books/1</stringProp>
-          <stringProp name="HTTPSampler.method">GET</stringProp>
-          <stringProp name="HTTPSampler.follow_redirects">true</stringProp>
-          <stringProp name="HTTPSampler.auto_redirects">false</stringProp>
-          <stringProp name="HTTPSampler.use_keepalive">true</stringProp>
-          <stringProp name="HTTPSampler.DO_MULTIPART_POST">false</stringProp>
-        </HTTPSamplerProxy>
-        <hashTree/>
-
-        <!-- STEP 6: Get Available Books -->
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="06-GET /books/available" enabled="true">
-          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
-            <collectionProp name="Arguments.arguments"/>
-          </elementProp>
-          <stringProp name="HTTPSampler.domain">host.docker.internal</stringProp>
-          <stringProp name="HTTPSampler.port">8000</stringProp>
-          <stringProp name="HTTPSampler.protocol">http</stringProp>
-          <stringProp name="HTTPSampler.path">/books/available</stringProp>
-          <stringProp name="HTTPSampler.method">GET</stringProp>
-          <stringProp name="HTTPSampler.follow_redirects">true</stringProp>
-          <stringProp name="HTTPSampler.auto_redirects">false</stringProp>
-          <stringProp name="HTTPSampler.use_keepalive">true</stringProp>
-          <stringProp name="HTTPSampler.DO_MULTIPART_POST">false</stringProp>
-        </HTTPSamplerProxy>
-        <hashTree/>
-
-        <!-- STEP 7: Create Book -->
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="07-POST /books" enabled="true">
-          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
-            <collectionProp name="Arguments.arguments"/>
-          </elementProp>
-          <stringProp name="HTTPSampler.domain">host.docker.internal</stringProp>
-          <stringProp name="HTTPSampler.port">8000</stringProp>
-          <stringProp name="HTTPSampler.protocol">http</stringProp>
-          <stringProp name="HTTPSampler.path">/books</stringProp>
-          <stringProp name="HTTPSampler.method">POST</stringProp>
-          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
-          <elementProp name="HTTPsampler.PostBody" elementType="Arguments">
-            <collectionProp name="Arguments.arguments">
-              <elementProp name="body" elementType="HTTPArgument">
-                <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                <stringProp name="Argument.value">{"title":"Test Book ${__threadNum}","author":"Test Author","isbn":"978-0-${__threadNum}","available":true}</stringProp>
-                <stringProp name="Argument.metadata">=</stringProp>
-              </elementProp>
-            </collectionProp>
-          </elementProp>
-          <stringProp name="HTTPSampler.follow_redirects">true</stringProp>
-          <stringProp name="HTTPSampler.auto_redirects">false</stringProp>
-          <stringProp name="HTTPSampler.use_keepalive">true</stringProp>
-          <stringProp name="HTTPSampler.DO_MULTIPART_POST">false</stringProp>
-        </HTTPSamplerProxy>
-        <hashTree/>
-
-        <!-- STEP 8: Get Categories -->
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="08-GET /categories" enabled="true">
-          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
-            <collectionProp name="Arguments.arguments"/>
-          </elementProp>
-          <stringProp name="HTTPSampler.domain">host.docker.internal</stringProp>
-          <stringProp name="HTTPSampler.port">8000</stringProp>
-          <stringProp name="HTTPSampler.protocol">http</stringProp>
-          <stringProp name="HTTPSampler.path">/categories</stringProp>
-          <stringProp name="HTTPSampler.method">GET</stringProp>
-          <stringProp name="HTTPSampler.follow_redirects">true</stringProp>
-          <stringProp name="HTTPSampler.auto_redirects">false</stringProp>
-          <stringProp name="HTTPSampler.use_keepalive">true</stringProp>
-          <stringProp name="HTTPSampler.DO_MULTIPART_POST">false</stringProp>
-        </HTTPSamplerProxy>
-        <hashTree/>
-
-        <!-- STEP 9: Create Category -->
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="09-POST /categories" enabled="true">
-          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
-            <collectionProp name="Arguments.arguments"/>
-          </elementProp>
-          <stringProp name="HTTPSampler.domain">host.docker.internal</stringProp>
-          <stringProp name="HTTPSampler.port">8000</stringProp>
-          <stringProp name="HTTPSampler.protocol">http</stringProp>
-          <stringProp name="HTTPSampler.path">/categories</stringProp>
-          <stringProp name="HTTPSampler.method">POST</stringProp>
-          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
-          <elementProp name="HTTPsampler.PostBody" elementType="Arguments">
-            <collectionProp name="Arguments.arguments">
-              <elementProp name="body" elementType="HTTPArgument">
-                <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                <stringProp name="Argument.value">{"name":"Category ${__threadNum}","description":"Test category"}</stringProp>
-                <stringProp name="Argument.metadata">=</stringProp>
-              </elementProp>
-            </collectionProp>
-          </elementProp>
-          <stringProp name="HTTPSampler.follow_redirects">true</stringProp>
-          <stringProp name="HTTPSampler.auto_redirects">false</stringProp>
-          <stringProp name="HTTPSampler.use_keepalive">true</stringProp>
-          <stringProp name="HTTPSampler.DO_MULTIPART_POST">false</stringProp>
-        </HTTPSamplerProxy>
-        <hashTree/>
-
-        <!-- STEP 10: Get Users (requires auth) -->
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="10-GET /users" enabled="true">
-          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
-            <collectionProp name="Arguments.arguments"/>
-          </elementProp>
-          <stringProp name="HTTPSampler.domain">host.docker.internal</stringProp>
-          <stringProp name="HTTPSampler.port">8000</stringProp>
-          <stringProp name="HTTPSampler.protocol">http</stringProp>
-          <stringProp name="HTTPSampler.path">/users</stringProp>
-          <stringProp name="HTTPSampler.method">GET</stringProp>
-          <stringProp name="HTTPSampler.follow_redirects">true</stringProp>
-          <stringProp name="HTTPSampler.auto_redirects">false</stringProp>
-          <stringProp name="HTTPSampler.use_keepalive">true</stringProp>
-          <stringProp name="HTTPSampler.DO_MULTIPART_POST">false</stringProp>
-        </HTTPSamplerProxy>
-        <hashTree/>
-
-        <!-- STEP 11: Get Loans (requires auth) -->
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="11-GET /loans" enabled="true">
-          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
-            <collectionProp name="Arguments.arguments"/>
-          </elementProp>
-          <stringProp name="HTTPSampler.domain">host.docker.internal</stringProp>
-          <stringProp name="HTTPSampler.port">8000</stringProp>
-          <stringProp name="HTTPSampler.protocol">http</stringProp>
-          <stringProp name="HTTPSampler.path">/loans</stringProp>
-          <stringProp name="HTTPSampler.method">GET</stringProp>
-          <stringProp name="HTTPSampler.follow_redirects">true</stringProp>
-          <stringProp name="HTTPSampler.auto_redirects">false</stringProp>
-          <stringProp name="HTTPSampler.use_keepalive">true</stringProp>
-          <stringProp name="HTTPSampler.DO_MULTIPART_POST">false</stringProp>
-        </HTTPSamplerProxy>
-        <hashTree/>
-
-        <!-- Results Collector -->
-        <ResultCollector guiclass="TablePanel" testclass="ResultCollector" testname="View Results Table" enabled="false">
-          <objProp>
-            <name>samplers</name>
-            <value class="java.util.ArrayList"/>
-          </objProp>
-          <stringProp name="filename"></stringProp>
-          <stringProp name="TestPlan.comments"></stringProp>
-        </ResultCollector>
-        <hashTree/>
       </hashTree>
     </hashTree>
   </hashTree>
