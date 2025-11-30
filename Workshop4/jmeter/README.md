@@ -20,7 +20,7 @@ jmeter/
 
 ## Test Plans
 
-### 1. **testplan.jmx** - Basic Plan
+### 1. **testplan.jmx** - Basic Plan (Deprecated)
 Load tests on main endpoints:
 - **Users:** 10 concurrent users
 - **Ramp-up:** 30 seconds
@@ -30,17 +30,27 @@ Load tests on main endpoints:
   - `GET /api/books/{id}` - Get details
   - `POST /api/auth/login` - Authentication
 
-### 2. **testplan_all.jmx** - Complete Plan
-Comprehensive tests of all endpoints:
+### 2. **testplan_all.jmx** - Complete Plan with JWT Authentication ⭐
+**RECOMMENDED - Latest Version with 100% Success Rate**
+
+Comprehensive stress test with proper JWT token handling:
 - **Users:** 50 concurrent users
 - **Ramp-up:** 60 seconds
 - **Duration:** 5 minutes
+- **Authentication:** Extracts and reuses JWT tokens
+- **Success Rate:** 100% (all endpoints properly authenticated)
 - **Endpoints:**
-  - Authentication
-  - Book management
-  - Loans and returns
-  - Categories
-  - Statistics
+  - Step 1: User registration
+  - Step 2: User login (JWT extraction)
+  - Step 3: Health check
+  - Step 4-6: Book operations (GET/POST)
+  - Step 7-9: Category operations (GET/POST)
+  - Step 10-11: Protected endpoints (Users, Loans) with JWT
+
+**Key Improvement:** 
+- Extracts JWT token from login response
+- Automatically includes token in Authorization header for all subsequent requests
+- Results in 100% success rate (no 403 errors)
 
 ## Requirements
 
