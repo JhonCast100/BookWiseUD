@@ -1,172 +1,172 @@
 # Cucumber - Acceptance Testing
 
-## Descripción
+## Description
 
-Este directorio contiene las pruebas de aceptación del proyecto BookWise utilizando **Behave** (implementación de Cucumber para Python).
+This directory contains the acceptance tests for the BookWise project using **Behave** (Cucumber implementation for Python).
 
-## Estructura del Proyecto
+## Project Structure
 
 ```
 cucumber/
-├── features/              # Feature files con user stories
+├── features/              # Feature files with user stories
 │   ├── login.feature
 │   ├── register.feature
 │   ├── books.feature
 │   ├── book_management.feature
 │   ├── borrow_return.feature
-│   └── steps/             # Step definitions (implementación de pasos)
-├── results/               # Resultados de ejecución
-├── requirements.txt       # Dependencias Python
-└── README.md             # Este archivo
+│   └── steps/             # Step definitions (implementation of steps)
+├── results/               # Execution results
+├── requirements.txt       # Python dependencies
+└── README.md             # This file
 ```
 
-## Features Implementados
+## Implemented Features
 
-### 1. **login.feature** - Autenticación de Usuarios
-- ✅ Login exitoso con credenciales válidas
-- ✅ Retorna token JWT
+### 1. **login.feature** - User Authentication
+- ✅ Successful login with valid credentials
+- ✅ Returns JWT token
 
-### 2. **register.feature** - Registro de Nuevos Usuarios
-- ✅ Registro de usuario con información válida
-- ✅ Validación de contraseña fuerte
-- ✅ Email único
+### 2. **register.feature** - New User Registration
+- ✅ User registration with valid information
+- ✅ Strong password validation
+- ✅ Unique email
 
-### 3. **books.feature** - Consulta de Libros
-- ✅ Listar todos los libros disponibles
-- ✅ Obtener detalles de un libro específico
+### 3. **books.feature** - Book Query
+- ✅ List all available books
+- ✅ Get details of a specific book
 
-### 4. **book_management.feature** - Gestión de Libros
-- ✅ Crear nuevo libro (Admin)
-- ✅ Actualizar información del libro
-- ✅ Eliminar libro
+### 4. **book_management.feature** - Book Management
+- ✅ Create new book (Admin)
+- ✅ Update book information
+- ✅ Delete book
 
-### 5. **borrow_return.feature** - Préstamo y Devolución
-- ✅ Prestar un libro
-- ✅ Devolver un libro prestado
-- ✅ Validar disponibilidad
+### 5. **borrow_return.feature** - Borrowing and Returning
+- ✅ Borrow a book
+- ✅ Return a borrowed book
+- ✅ Validate availability
 
-## Instalación y Configuración
+## Installation and Configuration
 
 ### Prerequisites
 - Python 3.11+
 - pip
 
-### Instalación de Dependencias
+### Install Dependencies
 ```bash
 pip install -r requirements.txt
 ```
 
-### Dependencias Instaladas
+### Installed Dependencies
 ```
-behave          # Framework para Cucumber
-behave-html-formatter  # Generador de reportes HTML
-requests        # Cliente HTTP para pruebas
+behave          # Cucumber framework
+behave-html-formatter  # HTML report generator
+requests        # HTTP client for testing
 ```
 
-## Ejecución de Pruebas
+## Running Tests
 
-### Ejecutar todas las pruebas
+### Run all tests
 ```bash
 behave
 ```
 
-### Ejecutar feature específica
+### Run specific feature
 ```bash
 behave features/login.feature
 ```
 
-### Ejecutar con formato específico
+### Run with specific format
 ```bash
-# Formato plain (simple)
+# Plain format (simple)
 behave -f plain
 
-# Formato pretty (más legible)
+# Pretty format (more readable)
 behave -f pretty
 
-# Formato JSON (para procesamiento)
+# JSON format (for processing)
 behave -f json
 ```
 
-### Generar reporte HTML
+### Generate HTML report
 ```bash
 behave -f html -o results/report.html
 ```
 
-## Uso con Docker Compose
+## Usage with Docker Compose
 
-Las pruebas se ejecutan automáticamente cuando levanta el docker-compose:
+Tests run automatically when docker-compose starts:
 
 ```bash
 docker-compose up
-# Las pruebas se ejecutarán en el workflow de GitHub Actions
+# Tests will run in the GitHub Actions workflow
 ```
 
-## Evidencia de Ejecución
+## Execution Evidence
 
-### Últimas Ejecuciones
+### Latest Executions
 
-#### Ejecución Local (29/11/2025)
+#### Local Execution (29/11/2025)
 ```
 Status: PASSED ✅
 Total Scenarios: 11
 Passed: 11
 Failed: 0
 Skipped: 0
-Duration: ~45 segundos
+Duration: ~45 seconds
 ```
 
-#### Endpoints Probados
-- `POST /api/auth/login` - ✅ Funcional
-- `POST /api/auth/register` - ✅ Funcional
-- `GET /api/books` - ✅ Funcional
-- `GET /api/books/{id}` - ✅ Funcional
-- `POST /api/books` (Admin) - ✅ Funcional
-- `PUT /api/books/{id}` - ✅ Funcional
-- `DELETE /api/books/{id}` - ✅ Funcional
-- `POST /api/loans` - ✅ Funcional
-- `PUT /api/loans/{id}/return` - ✅ Funcional
+#### Tested Endpoints
+- `POST /api/auth/login` - ✅ Functional
+- `POST /api/auth/register` - ✅ Functional
+- `GET /api/books` - ✅ Functional
+- `GET /api/books/{id}` - ✅ Functional
+- `POST /api/books` (Admin) - ✅ Functional
+- `PUT /api/books/{id}` - ✅ Functional
+- `DELETE /api/books/{id}` - ✅ Functional
+- `POST /api/loans` - ✅ Functional
+- `PUT /api/loans/{id}/return` - ✅ Functional
 
-## Resultados
+## Results
 
-Los resultados de las pruebas se guardan en:
-- `results/cucumber_run.txt` - Salida de texto plano
-- `results/cucumber_run.json` - Salida en formato JSON
+Test results are saved in:
+- `results/cucumber_run.txt` - Plain text output
+- `results/cucumber_run.json` - JSON output
 
-## Logs de Error
+## Error Logs
 
-Si hay errores, se guardan en:
-- `results/cucumber_junit_err.log` - Log de errores
+If there are errors, they are saved in:
+- `results/cucumber_junit_err.log` - Error log
 
 ## GitHub Actions CI/CD
 
-Las pruebas se ejecutan automáticamente en cada push a `main`:
+Tests run automatically on each push to `main`:
 
 ```yaml
 # Workflow: .github/workflows/e2e-ci.yml
-- Los servicios (Docker Compose) se inician
-- Se esperan 30 segundos para que estén listos
-- Se ejecutan las pruebas de behave
-- Se guardan los resultados como artifacts
+- Services (Docker Compose) are started
+- Wait 30 seconds for services to be ready
+- Run behave tests
+- Save results as artifacts
 ```
 
-## Casos de Prueba Exitosos
+## Successful Test Cases
 
-### Autenticación
-- ✅ Usuario puede login con credenciales válidas
-- ✅ Token JWT se retorna correctamente
-- ✅ Usuario puede registrarse con email válido
+### Authentication
+- ✅ User can login with valid credentials
+- ✅ JWT token is returned correctly
+- ✅ User can register with valid email
 
-### Libros
-- ✅ Listar libros retorna array válido
-- ✅ Obtener detalles de libro retorna objeto con título
-- ✅ Admin puede crear nuevo libro
-- ✅ Admin puede actualizar libro existente
-- ✅ Admin puede eliminar libro
+### Books
+- ✅ List books returns valid array
+- ✅ Get book details returns object with title
+- ✅ Admin can create new book
+- ✅ Admin can update existing book
+- ✅ Admin can delete book
 
-### Préstamos
-- ✅ Usuario puede prestar un libro
-- ✅ Usuario puede devolver libro prestado
-- ✅ Sistema valida disponibilidad
+### Loans
+- ✅ User can borrow a book
+- ✅ User can return borrowed book
+- ✅ System validates availability
 
 ## Troubleshooting
 
@@ -176,23 +176,23 @@ pip install -r requirements.txt
 ```
 
 ### Error: "Connection refused"
-Asegúrate que los servicios estén corriendo:
+Make sure services are running:
 ```bash
 docker-compose up -d
 docker-compose ps
 ```
 
 ### Error: "BAD_FORMAT=junit"
-Usa formatos soportados: `plain`, `pretty`, `json`
+Use supported formats: `plain`, `pretty`, `json`
 
-## Próximos Pasos
+## Next Steps
 
-- [ ] Agregar pruebas de validación de datos
-- [ ] Agregar pruebas de casos negativos
-- [ ] Implementar pruebas de performance
-- [ ] Agregar cobertura de seguridad
+- [ ] Add data validation tests
+- [ ] Add negative test cases
+- [ ] Implement performance tests
+- [ ] Add security coverage
 
-## Referencias
+## References
 
 - [Behave Documentation](https://behave.readthedocs.io/)
 - [Gherkin Syntax](https://cucumber.io/docs/gherkin/)
@@ -200,4 +200,4 @@ Usa formatos soportados: `plain`, `pretty`, `json`
 
 ---
 
-**Última actualización:** 29 de Noviembre, 2025
+**Last updated:** November 29, 2025

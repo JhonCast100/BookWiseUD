@@ -1,112 +1,112 @@
 # JMeter - Stress Testing & Load Testing
 
-## Descripción
+## Description
 
-Este directorio contiene los planes de prueba de carga y estrés para el proyecto BookWise usando **Apache JMeter**.
+This directory contains load and stress test plans for the BookWise project using **Apache JMeter**.
 
-## Estructura del Proyecto
+## Project Structure
 
 ```
 jmeter/
-├── testplan.jmx           # Plan de prueba básico
-├── testplan_all.jmx       # Plan de prueba completo
-├── results/               # Resultados de ejecución
-│   ├── jmeter_results.csv # Datos en CSV
-│   ├── result.jtl         # Formato JTL
-│   ├── result_all.jtl     # Formato JTL (plan completo)
-│   └── html-report/       # Reporte HTML
-└── README.md             # Este archivo
+├── testplan.jmx           # Basic test plan
+├── testplan_all.jmx       # Complete test plan
+├── results/               # Execution results
+│   ├── jmeter_results.csv # CSV format data
+│   ├── result.jtl         # JTL format
+│   ├── result_all.jtl     # JTL format (complete plan)
+│   └── html-report/       # HTML report dashboard
+└── README.md              # This file
 ```
 
-## Planes de Prueba
+## Test Plans
 
-### 1. **testplan.jmx** - Plan Básico
-Pruebas de carga en endpoints principales:
-- **Usuarios:** 10 usuarios concurrentes
-- **Ramp-up:** 30 segundos
-- **Duración:** 2 minutos
+### 1. **testplan.jmx** - Basic Plan
+Load tests on main endpoints:
+- **Users:** 10 concurrent users
+- **Ramp-up:** 30 seconds
+- **Duration:** 2 minutes
 - **Endpoints:**
-  - `GET /api/books` - Listar libros
-  - `GET /api/books/{id}` - Obtener detalles
-  - `POST /api/auth/login` - Autenticación
+  - `GET /api/books` - List books
+  - `GET /api/books/{id}` - Get details
+  - `POST /api/auth/login` - Authentication
 
-### 2. **testplan_all.jmx** - Plan Completo
-Pruebas exhaustivas de todos los endpoints:
-- **Usuarios:** 50 usuarios concurrentes
-- **Ramp-up:** 60 segundos
-- **Duración:** 5 minutos
+### 2. **testplan_all.jmx** - Complete Plan
+Comprehensive tests of all endpoints:
+- **Users:** 50 concurrent users
+- **Ramp-up:** 60 seconds
+- **Duration:** 5 minutes
 - **Endpoints:**
-  - Autenticación
-  - Gestión de libros
-  - Préstamos y devoluciones
-  - Categorías
-  - Estadísticas
+  - Authentication
+  - Book management
+  - Loans and returns
+  - Categories
+  - Statistics
 
-## Requisitos
+## Requirements
 
-- Apache JMeter 5.6.3+ (o la versión descargada)
+- Apache JMeter 5.6.3+ (or downloaded version)
 - Java 11+
 
-## Instalación
+## Installation
 
-### Descargar JMeter
+### Download JMeter
 ```bash
-# Ya está descargado en:
+# Already downloaded at:
 C:\Users\jjavi\Downloads\apache-jmeter-5.6.3\apache-jmeter-5.6.3\bin
 ```
 
-### Configurar PATH (opcional)
+### Configure PATH (optional)
 ```powershell
-# En PowerShell
+# In PowerShell
 $env:JMETER_HOME = "C:\Users\jjavi\Downloads\apache-jmeter-5.6.3\apache-jmeter-5.6.3"
 ```
 
-## Ejecución de Pruebas
+## Running Tests
 
-### Modo GUI (Interfaz Gráfica)
+### GUI Mode (Graphical Interface)
 ```bash
 cd C:\Users\jjavi\Downloads\apache-jmeter-5.6.3\apache-jmeter-5.6.3\bin
 .\jmeter.bat
 ```
 
-Luego:
-1. `File > Open` → Selecciona `testplan.jmx`
-2. Click en botón **Play** verde (▶)
+Then:
+1. `File > Open` → Select `testplan.jmx`
+2. Click green **Play** button (▶)
 
-### Modo Command Line (No-GUI)
+### Command Line Mode (No-GUI)
 ```bash
 cd C:\Users\jjavi\Downloads\apache-jmeter-5.6.3\apache-jmeter-5.6.3\bin
 
-# Plan básico
+# Basic plan
 .\jmeter -n -t ..\..\..\..\..\Workshop4\jmeter\testplan.jmx -l ..\..\..\..\..\Workshop4\jmeter\results\result.jtl -j ..\..\..\..\..\Workshop4\jmeter\results\jmeter.log
 
-# Plan completo
+# Complete plan
 .\jmeter -n -t ..\..\..\..\..\Workshop4\jmeter\testplan_all.jmx -l ..\..\..\..\..\Workshop4\jmeter\results\result_all.jtl -j ..\..\..\..\..\Workshop4\jmeter\results\jmeter.log
 ```
 
-### Generar Reporte HTML
+### Generate HTML Report
 ```bash
-# Con resultados existentes
+# With existing results
 .\jmeter -g ..\..\..\..\..\Workshop4\jmeter\results\result.jtl -o ..\..\..\..\..\Workshop4\jmeter\results\html-report
 ```
 
-## Uso con Docker Compose
+## Usage with Docker Compose
 
-Los tests de JMeter se ejecutan automáticamente en GitHub Actions:
+JMeter tests run automatically in GitHub Actions:
 
 ```yaml
 # Workflow: .github/workflows/e2e-ci.yml
-- JMeter se descarga automáticamente
-- Se ejecuta testplan.jmx en modo no-GUI
-- Los resultados se guardan como artifacts
+- JMeter downloads automatically
+- Runs testplan.jmx in no-GUI mode
+- Saves results as artifacts
 ```
 
-## Resultados
+## Results
 
-### Archivos Generados
+### Generated Files
 
 #### `jmeter_results.csv`
-Contiene datos de cada request:
+Contains data from each request:
 ```
 timeStamp,elapsed,label,responseCode,responseMessage,threadName,dataType,success,failureMessage,bytes,sentBytes,grpThreads,allThreads,Latency,Connect
 1700000000000,145,GET /api/books,200,OK,Thread Group 1-1,text,true,,2048,512,10,10,32,15
@@ -114,65 +114,65 @@ timeStamp,elapsed,label,responseCode,responseMessage,threadName,dataType,success
 ```
 
 #### `result.jtl` / `result_all.jtl`
-Formato nativo de JMeter (puede importarse para análisis)
+JMeter native format (can be imported for analysis)
 
 #### `html-report/index.html`
-Dashboard visual con:
-- Resumen de resultados
-- Gráficos de rendimiento
-- Estadísticas de latencia
-- Tasa de error
+Visual dashboard with:
+- Results summary
+- Performance graphs
+- Latency statistics
+- Error rate
 
-## Análisis de Resultados
+## Results Analysis
 
-### Métricas Clave
+### Key Metrics
 
-#### Plan Básico (testplan.jmx)
+#### Basic Plan (testplan.jmx)
 ```
-Muestra (Samples):          120
-Tiempo promedio:            145 ms
-Tiempo mín:                 32 ms
-Tiempo máx:                 512 ms
-Desviación estándar:        95 ms
-Error %:                    0%
+Samples:                    120
+Average Time:               145 ms
+Min Time:                    32 ms
+Max Time:                   512 ms
+Standard Deviation:          95 ms
+Error %:                      0%
 Throughput:                 60 requests/min
 ```
 
-#### Plan Completo (testplan_all.jmx)
+#### Complete Plan (testplan_all.jmx)
 ```
-Muestra (Samples):          500
-Tiempo promedio:            215 ms
-Tiempo mín:                 45 ms
-Tiempo máx:                 1200 ms
-Desviación estándar:        142 ms
+Samples:                    500
+Average Time:               215 ms
+Min Time:                    45 ms
+Max Time:                  1200 ms
+Standard Deviation:         142 ms
 Error %:                    2.1%
-Throughput:                 100 requests/min
+Throughput:                100 requests/min
 ```
 
-### Interpretación
+### Interpretation
 
-| Métrica | Estado | Rango |
-|---------|--------|-------|
-| Tiempo promedio | ✅ Bueno | < 300 ms |
-| Error % | ✅ Aceptable | < 5% |
+| Metric | Status | Range |
+|--------|--------|-------|
+| Average time | ✅ Good | < 300 ms |
+| Error % | ✅ Acceptable | < 5% |
 | Throughput | ✅ Normal | > 50 req/min |
-| Latencia máx | ⚠️ Revisar | < 2000 ms |
+| Max latency | ⚠️ Review | < 2000 ms |
 
-## Configuración de Endpoints
+## Endpoint Configuration
 
-### Backend Python (8000)
+### Python Backend (8000)
 ```
 http://localhost:8000/api/books
 http://localhost:8000/api/books/{id}
 ```
 
-### Backend Java (8080)
+### Java Backend (8080)
 ```
 http://localhost:8080/auth/login
 http://localhost:8080/auth/register
 ```
 
-### Base de Datos
+### Database
 - **PostgreSQL:** localhost:5432 (BookWise DB)
 - **MySQL:** localhost:3306 (Security DB)
 
@@ -180,59 +180,59 @@ http://localhost:8080/auth/register
 
 ### Error: "Connection refused"
 ```powershell
-# Asegúrate que los servicios estén corriendo
+# Make sure services are running
 docker-compose ps
 
-# Si no están, inicia
+# If not, start them
 docker-compose up -d
 ```
 
 ### Error: "Java not found"
 ```powershell
-# Verifica instalación de Java
+# Verify Java installation
 java -version
 
-# Si no está, instálalo desde https://www.oracle.com/java/technologies/downloads/
+# If not installed, download from https://www.oracle.com/java/technologies/downloads/
 ```
 
 ### Error: "Port already in use"
 ```powershell
-# Encuentra el proceso usando el puerto
+# Find process using port
 netstat -ano | findstr :8000
 netstat -ano | findstr :8080
 
-# Mata el proceso
+# Kill process
 taskkill /PID <PID> /F
 ```
 
-### Los resultados no se guardan
-- Verifica que la carpeta `results/` exista
-- Usa rutas absolutas en comandos
-- Comprueba permisos de escritura
+### Results not saved
+- Verify `results/` folder exists
+- Use absolute paths in commands
+- Check write permissions
 
-## Próximos Pasos
+## Next Steps
 
-- [ ] Agregar pruebas de degradación (stress test)
-- [ ] Implementar pruebas de resistencia (soak test)
-- [ ] Agregar pruebas de volumen de datos
-- [ ] Crear alertas personalizadas
-- [ ] Integrar con herramientas de monitoreo
+- [ ] Add degradation tests (stress test)
+- [ ] Implement endurance tests (soak test)
+- [ ] Add data volume tests
+- [ ] Create custom alerts
+- [ ] Integrate with monitoring tools
 
-## Referencia de Parámetros JMeter
+## JMeter Parameter Reference
 
-| Parámetro | Descripción |
+| Parameter | Description |
 |-----------|-------------|
-| `-n` | Modo no-GUI (headless) |
-| `-t` | Archivo del test plan (.jmx) |
-| `-l` | Archivo de salida de resultados (.jtl) |
-| `-j` | Archivo de log |
-| `-g` | Generar reporte HTML |
-| `-o` | Directorio de salida del reporte |
-| `-Jkey=value` | Define parámetro global |
+| `-n` | No-GUI mode (headless) |
+| `-t` | Test plan file (.jmx) |
+| `-l` | Results output file (.jtl) |
+| `-j` | Log file |
+| `-g` | Generate HTML report |
+| `-o` | Report output directory |
+| `-Jkey=value` | Define global parameter |
 
-## Archivos de Configuración
+## Configuration Files
 
-### Variables Globales (en JMeter)
+### Global Variables (in JMeter)
 ```properties
 BASE_URL=localhost
 PORT_PYTHON=8000
@@ -242,7 +242,7 @@ RAMP_UP=30
 DURATION=120
 ```
 
-## Links Útiles
+## Useful Links
 
 - [Apache JMeter Docs](https://jmeter.apache.org/usermanual/index.html)
 - [JMeter Best Practices](https://jmeter.apache.org/usermanual/best-practices.html)
@@ -250,5 +250,5 @@ DURATION=120
 
 ---
 
-**Última actualización:** 29 de Noviembre, 2025
+**Last updated:** November 29, 2025
 **JMeter Version:** 5.6.3
