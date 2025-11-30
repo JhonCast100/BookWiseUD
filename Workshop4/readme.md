@@ -102,12 +102,12 @@ Results stored in:
 
 ### 📸 JUnit Evidence
 
-![junit-results](imgs/junit.png)
+![junit](imgs/junit.png)
 
 
 ### 📸 PyTest Evidence
 
-![pytest-results](imgs/pytest.png)
+![pytest](imgs/pytest.png)
 
 ---
 
@@ -263,6 +263,7 @@ Actions tab → latest workflow
 * GitHub Actions
 
 ---
+
 
 
 
