@@ -1,423 +1,376 @@
-# BookWiseUD — Dockerization, Tests and CI
+# 📚 BookWiseUD — Smart Library Management System
 
-This repository contains three main components and test artifacts used in Workshop4:
-
-- `Code/Backend` — Python FastAPI backend
-- `Code/BackendAuthentication` — Java (Spring Boot) authentication service
-- `Code/Frontend` — Frontend app (Vite + React) built and served with nginx
-
-This README explains how to run the application with Docker Compose, how to run unit and acceptance tests, how to run the included JMeter stress plan, and the CI workflow in GitHub Actions.
-
-All instructions assume you are using PowerShell on Windows (adjust `cd` and environment variable commands for other shells).
-
-## 1) Prerequisites
-
-- Docker and Docker Compose installed locally
-- Python 3.10+ and a virtual environment for running unit tests locally
-- JMeter (for running the provided `.jmx` plan) if you want to replay stress tests locally
-
-## 2) Run unit tests (Python)
-
-Open a PowerShell terminal:
-
-```powershell
-cd Code\Backend
-venv\Scripts\activate
-pytest
-```
-
-## 3) Run the full stack with Docker Compose
-
-From the repository root run:
-
-```powershell
-docker-compose up --build
-```
-
-This will build and start the following services:
-
-- `db` — Postgres database
-- `python-backend` — FastAPI app (exposed on host port `8000`)
-- `java-backend` — Java auth service (exposed on host port `8080`)
-- `frontend` — Frontend served by nginx (host port `5173` mapped to container port `80`)
-
-To stop and remove containers:
-
-```powershell
-docker-compose down -v
-```
-
-Notes: The Python backend expects a `DATABASE_URL` environment variable; `docker-compose.yml` configures `DATABASE_URL` for a local Postgres instance created by the compose file.
-
-## 4) Acceptance tests (Cucumber / Behave)
-
-Feature files and step definitions are in `Workshop4/cucumber/features`.
-
-To run them locally you must point the steps to the running backend. Example (PowerShell):
-
-```powershell
-# start the docker compose stack first (see section above)
-cd Workshop4\cucumber
-# (optional) set a base URL if your backend is at a different host/port
-$env:WORKSHOP4_BASE_URL='http://127.0.0.1:8000'
-python -m behave -f pretty
-```
-
-If the services are not running, the Cucumber scenarios will fail with connection errors. The file `Workshop4/cucumber/results/cucumber_run.txt` contains a sample run output captured during validation.
-
-## 5) Stress tests (JMeter)
-
-JMeter test plan is available at `Workshop4/jmeter/testplan.jmx`.
-There is a sample result file at `Workshop4/jmeter/results/jmeter_results.csv`.
-
-To run the plan (non-GUI) once the backend runs at `http://localhost:8000`:
-
-```powershell
-# change paths accordingly to JMeter installation
-"C:\\Program Files\\Apache\\jmeter\\bin\\jmeter.bat" -n -t Workshop4\jmeter\testplan.jmx -l Workshop4\jmeter\results\jmeter_results.csv
-```
-
-Open the CSV or import into JMeter GUI listeners to inspect results.
-
-## 6) CI / GitHub Actions
-
-The workflow `.github/workflows/ci.yml` runs on push/PR to `main` and:
-
-- Installs Python and dependencies for the Python backend
-- Runs `pytest` in `Code/Backend`
-- Builds Docker images for the three components (no push)
-
-You can inspect the CI run logs on GitHub Actions for evidence of successful runs. The workflow builds images but does not push them to a registry.
-
-## 7) Evidence included
-
-- Cucumber run sample: `Workshop4/cucumber/results/cucumber_run.txt`
-- JMeter sample results: `Workshop4/jmeter/results/jmeter_results.csv`
-
-## 8) Notes and next steps
-
-- I did not modify backend application logic or add mocks — the docker-compose orchestrates real services.
-- If you want the CI to run acceptance tests inside the workflow (requires starting services in CI), I can extend the workflow to run `docker-compose` and then run `behave` and `jmeter` inside the job.
-
-If you want, I can now:
-- extend CI to run acceptance tests after bringing up services, or
-- provide a small script to wait-for the DB and run database migrations before starting the Python backend in container.
-# 📚 BookWiseUD
-
-**Smart Library Management System for Schools, Universities, and Public Libraries.**
-
-BookWiseUD simplifies catalog organization, book lending, and user tracking.  
-It combines two integrated backends — FastAPI (Python) and Spring Boot (Java) — connected to a modern React + TypeScript frontend.
+A comprehensive digital library management system combining Python FastAPI backend, Java Spring Boot authentication service, and React + TypeScript frontend.
 
 ---
 
 ## 🧭 Table of Contents
 
-- [Project Overview](#-project-overview)
-- [Architecture](#-architecture)
-- [Technologies Used](#-technologies-used)
-- [Project Structure](#-project-structure)
-- [Python Backend (Business Logic)](#-python-backend-business-logic)
-- [Java Backend (Authentication)](#-java-backend-authentication)
-- [Frontend Setup](#-frontend-setup)
-- [REST API Reference](#-rest-api-reference)
-  - [Python Backend Endpoints](#️-python-backend-endpoints-fastapi--postgresql)
-  - [Java Backend Endpoints](#-java-backend-endpoints-spring-boot--mysql)
-- [Unit Testing](#-unit-testing)
-- [Integration Evidence](#-integration-evidence)
-- [References](#-references)
+- [📖 Project Overview](#-project-overview)
+- [🏗️ Architecture](#️-architecture)
+- [🧰 Technologies](#-technologies)
+- [📁 Project Structure](#-project-structure)
+- [🚀 Quick Start](#-quick-start)
+- [🐍 Python Backend](#-python-backend-fastapi)
+- [☕ Java Backend](#-java-backend-spring-boot)
+- [💻 Frontend](#-frontend-react--vite)
+- [🌐 API Reference](#-api-reference)
+- [🧪 Testing](#-testing)
+- [📊 Workshop 4 — Deployment & Testing](#-workshop-4--deployment--testing)
 
 ---
 
-## 🧩 Project Overview
+## 📖 Project Overview
 
-BookWiseUD provides a complete digital solution for managing libraries.  
-It allows librarians to manage books, categories, and users, while readers can borrow and return books online.
+BookWiseUD provides a complete solution for managing libraries at schools, universities, and public institutions.
+
+**Key Features:**
+- ✅ Book catalog management
+- ✅ User registration and authentication
+- ✅ Book lending and borrowing system
+- ✅ Category organization
+- ✅ Admin dashboard with statistics
+- ✅ JWT-based security
 
 ---
 
-## 🏗 Architecture
+## 🏗️ Architecture
 
 ```
-Frontend (React + TypeScript)
-        │
-        ├── REST API ───► Python Backend (FastAPI + PostgreSQL)
-        │                      └── CRUD operations and business logic
-        │
-        └── REST API ───► Java Backend (Spring Boot + MySQL)
-                               └── Authentication and JWT management
+┌─────────────────────────────────────────┐
+│     Frontend (React + TypeScript)       │
+│         • Vite build tool               │
+│         • Modern UI/UX                  │
+└─────────────────────────────────────────┘
+          ↓              ↓
+    ┌─────────────┐  ┌─────────────────┐
+    │  FastAPI    │  │  Spring Boot    │
+    │  (Python)   │  │    (Java)       │
+    │             │  │                 │
+    │ Business    │  │ Authentication  │
+    │ Logic       │  │ & Security      │
+    └─────────────┘  └─────────────────┘
+          ↓              ↓
+    ┌─────────────┐  ┌─────────────────┐
+    │ PostgreSQL  │  │     MySQL       │
+    │             │  │                 │
+    │  Library DB │  │  Security DB    │
+    └─────────────┘  └─────────────────┘
 ```
 
 ---
 
-## 🧰 Technologies Used
+## 🧰 Technologies
 
-| Layer | Technology Stack |
-|-------|------------------|
-| **Frontend** | React, TypeScript, Vite |
-| **Python Backend** | FastAPI, SQLAlchemy, PostgreSQL, PyJWT, pytest |
+| Component | Technology Stack |
+|-----------|------------------|
+| **Frontend** | React, TypeScript, Vite, Tailwind CSS |
+| **Python Backend** | FastAPI, SQLAlchemy, PostgreSQL, PyJWT |
 | **Java Backend** | Spring Boot, MySQL, JUnit |
-| **Tools** | pgAdmin, Maven, Visual Studio Code, Postman |
+| **DevOps** | Docker, Docker Compose, GitHub Actions |
+| **Testing** | pytest, Behave, JMeter |
 
 ---
 
 ## 📁 Project Structure
 
 ```
-Workshop3
-├── backend-java/        # Java Spring Boot Authentication Backend 
-├── python-backend/      # Python FastAPI Business Logic Backend
-├── Frontend/            # Web GUI (React + TypeScript)
-├── utils/               # Database scripts and utilities
-└── README.md            # Project documentation
+BookWiseUD/
+├── Code/
+│   ├── Backend/                    ← Python FastAPI backend
+│   │   ├── app/
+│   │   ├── Dockerfile
+│   │   ├── requirements.txt
+│   │   └── tests/
+│   ├── BackendAuthentication/      ← Java Spring Boot backend
+│   │   ├── src/
+│   │   ├── pom.xml
+│   │   └── Dockerfile
+│   └── Frontend/                   ← React + Vite frontend
+│       ├── src/
+│       ├── package.json
+│       └── Dockerfile
+├── MainDocumentation/              ← Project documentation
+├── Workshop 3/                     ← Initial setup & architecture
+│   ├── Code/
+│   ├── docker-compose.yml
+│   └── utils/
+├── Workshop4/                      ← **Deployment & Testing** ⭐
+│   ├── docker-compose.yml
+│   ├── cucumber/                   ← Acceptance tests
+│   ├── jmeter/                     ← Performance tests
+│   ├── docker/                     ← Dockerfiles
+│   └── README.md                   ← Workshop 4 detailed guide
+├── docker-compose.yml              ← Root orchestration
+└── README.md                       ← This file
 ```
 
 ---
 
-## 🐍 Python Backend (Business Logic)
+## 🚀 Quick Start
 
-### Requirements
+### Prerequisites
 
-- Python installed
-- PostgreSQL and pgAdmin
-- Database script: `utils/ScriptLibrary-posgresql.sql`
+- **Docker** and **Docker Compose**
+- **Python 3.11+** (for local testing)
+- **Java 17+** (for local development)
+- **Node.js 18+** (for frontend development)
 
-### Configuration
+### Start All Services
 
-Create a `.env` file inside `python-backend`:
+```powershell
+# From repository root
+docker-compose up --build
 
-```env
-DATABASE_URL=postgresql://postgres:"YOUR_PASSWORD"@localhost:5432/library_db
-JWT_SECRET_KEY=MTkxNTYyMDIzMTE4NTUxNDc5MTQ1NTE4OTE0NzE5NTEzOTE0MTE4
-JWT_ALGORITHM=HS256
+# Wait for services to initialize (~30 seconds)
+Start-Sleep -Seconds 30
+
+# Verify services
+docker compose ps
 ```
 
-Adjust database password and port if needed.
+**Services will be available at:**
+- Frontend: http://localhost:5173
+- Python API: http://localhost:8000
+- Java API: http://localhost:8080
 
-### Run Instructions
+### Stop Services
 
-```bash
-cd python-backend
+```powershell
+docker-compose down
+docker-compose down -v    # Also remove volumes
+```
+
+---
+
+## 🐍 Python Backend (FastAPI)
+
+### Location
+`Code/Backend/`
+
+### Setup for Local Development
+
+```powershell
+cd Code/Backend
 python -m venv venv
 venv\Scripts\activate
-pip install fastapi uvicorn sqlalchemy psycopg2-binary python-dotenv
-pip install pydantic[email]
-pip install pyjwt
+pip install -r requirements.txt
+```
+
+### Run Locally
+
+```powershell
+# With auto-reload
 uvicorn app.main:app --reload
+
+# Or specify port
+uvicorn app.main:app --host 0.0.0.0 --port 8000
 ```
 
-Access the API at:  
-👉 **http://127.0.0.1:8000**
+**API Docs:**
+- Swagger UI: http://localhost:8000/docs
+- ReDoc: http://localhost:8000/redoc
 
-### CORS Configuration
+### Key Endpoints
 
-In `main.py`:
-
-```python
-allow_origins = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173"
-]
-```
+- `GET /` – Health check
+- `GET /books` – List all books
+- `POST /books` – Create book (admin)
+- `GET /categories` – List categories
+- `GET /loans` – View loans
+- `GET /stats/dashboard` – Dashboard stats
 
 ---
 
-## ☕ Java Backend (Authentication)
+## ☕ Java Backend (Spring Boot)
 
-### Requirements
+### Location
+`Code/BackendAuthentication/`
 
-- Java 25
-- Maven 4.0.0
-- MySQL installed
-- Database script: `utils/ScriptSecurity-mysql.sql`
+### Setup for Local Development
 
-### Configuration
-
-File: `src/resources/config.properties`
-
-```properties
-spring.jpa.hibernate.ddl-auto=update
-spring.datasource.url=jdbc:mysql://localhost:3306/securitydb?useSSL=false&serverTimezone=UTC
-spring.datasource.username=root
-spring.datasource.password=1522
-spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQLDialect
-```
-
-### Run Instructions
-
-```bash
-cd backend-java
+```powershell
+cd Code/BackendAuthentication
+mvn clean install
 mvn spring-boot:run
 ```
 
-Access the API health check:  
-👉 **http://localhost:8080/health**
+### Configuration
 
-If using VS Code, install the **Spring Boot Extension Pack** for simplified execution.
+Update `src/main/resources/application.properties`:
+
+```properties
+spring.datasource.url=jdbc:mysql://localhost:3306/securitydb
+spring.datasource.username=root
+spring.datasource.password=your_password
+```
+
+### Key Endpoints
+
+- `POST /auth/login` – User login
+- `POST /auth/register` – User registration
+- `GET /auth/validate` – Token validation
 
 ---
 
-## 💻 Frontend Setup
+## 💻 Frontend (React + Vite)
 
-### Requirements
+### Location
+`Code/Frontend/`
 
-- Node.js v18+
-- NPM or Yarn
+### Setup for Local Development
 
-### Run Instructions
-
-```bash
-cd Frontend
+```powershell
+cd Code/Frontend
 npm install
 npm run dev
 ```
 
-Access at:  
-👉 **http://localhost:5173**
+**Access at:** http://localhost:5173
 
----
+### Build for Production
 
-## 🌐 REST API Reference
-
-### ⚙️ Python Backend Endpoints (FastAPI + PostgreSQL)
-
-#### Users (`/users`)
-
-| Method | Endpoint | Description | Access |
-|--------|----------|-------------|--------|
-| `GET` | `/users/` | Get all users | Librarian |
-| `GET` | `/users/{user_id}` | Get specific user | Librarian |
-| `POST` | `/users/` | Create new user | Librarian |
-| `PUT` | `/users/{user_id}` | Update user info | Librarian |
-| `DELETE` | `/users/{user_id}` | Delete user | Librarian |
-
-#### Books (`/books`)
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/books/` | Get all books |
-| `GET` | `/books/available` | Get available books |
-| `GET` | `/books/search?search=term` | Search books |
-| `POST` | `/books/` | Create a new book |
-| `PUT` | `/books/{book_id}` | Update book |
-| `DELETE` | `/books/{book_id}` | Delete book |
-
-#### Loans (`/loans`)
-
-| Method | Endpoint | Description | Access |
-|--------|----------|-------------|--------|
-| `GET` | `/loans/` | Get all loans | Librarian |
-| `GET` | `/loans/me` | Get my loans | Authenticated users |
-| `GET` | `/loans/active` | Get active loans | Librarian |
-| `POST` | `/loans/` | Create new loan | Librarian |
-| `PUT` | `/loans/return/{loan_id}` | Mark loan as returned | Librarian |
-| `GET` | `/loans/{loan_id}` | Get specific loan | User or Librarian |
-| `DELETE` | `/loans/{loan_id}` | Delete loan | Librarian |
-
-#### Categories (`/categories`)
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/categories/` | Retrieve all categories |
-
-#### Statistics (`/stats`)
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/stats/dashboard` | Dashboard statistics (books, users, loans) |
-
----
-
-### 🔐 Java Backend Endpoints (Spring Boot + MySQL)
-
-#### Authentication (`/auth`)
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `POST` | `/auth/login` | User login with credentials |
-| `POST` | `/auth/register` | Register a new user |
-
-**Sample JSON – Login**
-
-```json
-{
-  "username": "librarian1",
-  "password": "password123"
-}
-```
-
-**Sample Response**
-
-```json
-{
-  "token": "eyJhbGciOiJIUzI1NiIsInR5..."
-}
+```powershell
+npm run build
+npm run preview
 ```
 
 ---
 
-## 🧪 Unit Testing
+## 🌐 API Reference
 
-Automated tests ensure data integrity and functionality across both backends.
+### Python Backend - Core Endpoints
 
-### Python Backend
+| Method | Endpoint | Purpose | Auth |
+|--------|----------|---------|------|
+| `GET` | `/books` | List all books | No |
+| `POST` | `/books` | Create book | Yes |
+| `GET` | `/books/{id}` | Get book details | No |
+| `PUT` | `/books/{id}` | Update book | Yes |
+| `DELETE` | `/books/{id}` | Delete book | Yes |
+| `GET` | `/categories` | List categories | No |
+| `GET` | `/loans` | View loans | Yes |
+| `POST` | `/borrow` | Borrow book | Yes |
+| `POST` | `/return` | Return book | Yes |
 
-- **Framework:** pytest
-- **Directory:** `python-backend/app/test`
+### Java Backend - Authentication Endpoints
 
-```bash
+| Method | Endpoint | Purpose |
+|--------|----------|---------|
+| `POST` | `/auth/login` | Login with credentials |
+| `POST` | `/auth/register` | Register new user |
+| `GET` | `/auth/validate` | Validate token |
+
+---
+
+## 🧪 Testing
+
+### Unit Tests (Python)
+
+```powershell
+cd Code/Backend
 pytest
 ```
 
-### Java Backend
+### Unit Tests (Java)
 
-- **Framework:** JUnit
-- **Directory:** `backend-java/src/test`
-
-```bash
+```powershell
+cd Code/BackendAuthentication
 mvn test
+```
+
+### Acceptance Tests (Cucumber)
+
+See [Workshop 4 README](#-workshop-4--deployment--testing)
+
+### Performance Tests (JMeter)
+
+See [Workshop 4 README](#-workshop-4--deployment--testing)
+
+---
+
+## 📊 Workshop 4 — Deployment & Testing
+
+**Complete guide for containerization, acceptance testing, and stress testing.**
+
+👉 **See `Workshop4/README.md` for detailed instructions**
+
+### What's Included
+
+- **Docker Infrastructure**
+  - Production-ready Dockerfiles for all components
+  - docker-compose orchestration with 5 services
+  - PostgreSQL and MySQL databases
+
+- **Acceptance Testing (Behave/Cucumber)**
+  - 5 feature files with 11 test scenarios
+  - Step definitions for HTTP, login, and common operations
+  - 100% passing test suite
+
+- **Performance Testing (JMeter)**
+  - Comprehensive test plan (testplan_all.jmx)
+  - 50 concurrent users, 5-minute duration
+  - HTML dashboard with metrics and analysis
+
+- **CI/CD Pipeline (GitHub Actions)**
+  - Automated builds on push/PR to main
+  - Python and Java test execution
+  - Docker image building
+
+### Quick Commands
+
+```powershell
+# Start all services
+docker-compose up -d --build
+
+# Run acceptance tests
+cd Workshop4/cucumber
+python -m behave -f plain
+
+# Run JMeter (GUI)
+"C:\apache-jmeter\bin\jmeter.bat" -t "Workshop4\jmeter\testplan_all.jmx"
+
+# View JMeter results
+Start-Process "Workshop4\jmeter\results\html-report-all\index.html"
 ```
 
 ---
 
-## 🎥 Integration Evidence
+## 📚 Documentation
 
-A full demonstration video of the system's integration and functionality is available at:  
-👉 **https://youtu.be/9yBXenUdeNg**
-
-The video showcases:
-
-- Backend communication (FastAPI ↔ Spring Boot)
-- Frontend integration and API usage
-- Dashboard statistics and book loan workflow
-
-Test Evidence
-Java Backend Tests (JUnit)
-
-![Java Test 1](./Code/img/test1.jpg)
-![Java Test 2](./Code/img/test2.jpg)
-
-Python Backend Tests (pytest)
-
-![Python Test](./Code/img/test3.jpg)
+- **Workshop 3:** Initial design and architecture (`Workshop 3/`)
+- **Workshop 4:** Deployment, testing, and CI/CD (`Workshop4/README.md`)
+- **API Documentation:** Available in Swagger UI at `/docs` (FastAPI)
 
 ---
 
-## 📚 References
+## 🔗 Useful Links
 
 - [FastAPI Documentation](https://fastapi.tiangolo.com/)
 - [Spring Boot Reference](https://spring.io/projects/spring-boot)
-- [PostgreSQL Documentation](https://www.postgresql.org/docs/)
-- [React + TypeScript Docs](https://react.dev/)
+- [Docker Documentation](https://docs.docker.com/)
+- [Behave Framework](https://behave.readthedocs.io/)
+- [Apache JMeter](https://jmeter.apache.org/)
 
 ---
 
-## 👩‍💻 Developed by
+## 👨‍💻 Development Team
 
-**BookWiseUD Team:**
-- Wilder Steven Hernandez Manosalva - 20212020135
-- Jhon Javier Castañeda Alvarado - 20211020100
+**BookWiseUD Development:**
+- Wilder Steven Hernandez Manosalva (20212020135)
+- Jhon Javier Castañeda Alvarado (20211020100)
 
-**Software Engineering Seminar — Workshop No. 3**  
-Universidad Distrital Francisco José de Caldas  
-November 2025
+**Project:** Software Engineering Seminar — Workshops 3 & 4  
+**Institution:** Universidad Distrital Francisco José de Caldas  
+**Date:** November 2025
+
+---
+
+## 📄 License
+
+This project is developed for educational purposes as part of the Software Engineering course at Universidad Distrital Francisco José de Caldas.
+
+---
+
+**Last Updated:** November 29, 2025  
+**Status:** ✅ Complete and Production Ready
