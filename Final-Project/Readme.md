@@ -12,8 +12,9 @@ BookWise is a comprehensive library management system designed for educational i
 
 ### System Architecture Rationale
 
-```
 ![BookWise System Architecture](./images/architecture-diagram.png)
+```
+
 
 Diagram: BookWise System Architecture showing frontend, API gateway, and microservices communication
 ```
