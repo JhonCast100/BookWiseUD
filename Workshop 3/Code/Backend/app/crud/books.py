@@ -38,7 +38,7 @@ def update_book(db: Session, book_id: int, book_update: schemas.BookCreate):
     book = get_book_by_id(db, book_id)
     if not book:
         return None
-    for key, value in book_update.dict().items():
+    for key, value in book_update.model_dump().items():
         setattr(book, key, value)
     db.commit()
     db.refresh(book)

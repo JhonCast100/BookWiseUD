@@ -1,60 +1,57 @@
-# Workshop 4 - Deployment, Acceptance Testing & Stress Testing
+## 📋 Overview
+
+Workshop 4 contains all deliverables for deployment, acceptance testing (Cucumber/Behave), and stress testing (JMeter) of the BookWise application. This includes:
+
+- ✅ **Dockerfiles** for all three components (Java Backend, Python Backend, Frontend)
+- ✅ **docker-compose.yml** to orchestrate all services
+- ✅ **Cucumber features & step definitions** for acceptance testing (Behave framework)
+- ✅ **JMeter test plans** (JMX) with stress testing results
+- ✅ **GitHub Actions CI/CD workflow** for automated builds and testing
+
+---
 
 ## 🐳 1. Docker & docker-compose
 
 ### Dockerfiles Location
 
-All Dockerfiles are located in the main service directories:
+All Dockerfiles are located in the `docker/` directory:
 
 | Component | Dockerfile | Language | Port |
 |-----------|-----------|----------|------|
-| **Backend Java (Spring Boot)** | `../Code/BackendAuthentication/Dockerfile` | Java 17 | 8080 |
-| **Backend Python (FastAPI)** | `../Code/Backend/Dockerfile` | Python 3.11 | 8000 |
-| **Frontend (Vite + React)** | `../Code/Frontend/Dockerfile` | Node 18 | 5173 (mapped from 80) |
+| **Backend Java (Spring Boot)** | `docker/DockerFile-java` | Java 17 | 8080 |
+| **Backend Python (FastAPI)** | `docker/DockerFile-python` | Python 3.11 | 8000 |
+| **Frontend (Vite + React)** | `docker/DockerFile-frontend` | Node 18 | 5173 |
 
 ### Docker Compose Configuration
 
-**File:** `docker-compose.yml` (root level)
+**File:** `docker-compose.yml` (root level of BookWiseUD)
 
 **Services:**
 - `db` – PostgreSQL 15 (BookWise catalog database)
 - `mysql` – MySQL 8.0 (Authentication/Security database)
 - `python-backend` – FastAPI service (port 8000)
 - `java-backend` – Spring Boot auth service (port 8080)
-- `frontend` – Nginx-served Vite app (port 5173)
+- `frontend` – React Vite application (port 5173)
 
 ### How to Run All Services Locally
 
 From the repository **root** directory:
 
 ```powershell
-# Option 1: Build and start all services
+# Start all services with build
 docker-compose up --build
 
-# Option 2: Just start (if images are already built)
-docker-compose up
+# Or just start if images are already built
+docker-compose up -d
 
-# Option 3: Run in background
-docker-compose up -d --build
+# Wait for all services to be ready
+Start-Sleep -Seconds 30
 ```
 
-**Wait for output:** You should see messages like:
-```
-python-backend-1  | INFO:     Uvicorn running on http://0.0.0.0:8000
-java-backend-1    | Started AuthenticationApplication
-frontend-1        | [80] INFO: Started server process
-```
-
-### Verify Services Are Running
+**Verify Services Are Running:**
 
 ```powershell
-# Check all containers
 docker compose ps
-
-# Test endpoints
-curl http://localhost:8000/health           # Python backend health
-curl http://localhost:8080/api/auth/status  # Java backend status
-curl http://localhost:5173                  # Frontend (will redirect to nginx)
 ```
 
 ### Stop Services
@@ -77,8 +74,8 @@ All feature files are in: `Workshop4/cucumber/features/`
 **Available features:**
 - `login.feature` – User login scenarios
 - `register.feature` – User registration scenarios
-- `books.feature` – Book listing and availability
-- `book_management.feature` – Adding/updating books
+- `books.feature` – Book listing and details
+- `book_management.feature` – Adding/updating/deleting books
 - `borrow_return.feature` – Borrowing and returning books
 
 ### Step Definitions
@@ -87,57 +84,45 @@ Located in: `Workshop4/cucumber/features/steps/`
 
 **Key files:**
 - `http_steps.py` – Generic HTTP request steps (GET, POST, PUT, DELETE)
-- `auth_steps.py` – Authentication and token management steps
-- `common_steps.py` – Shared step implementations
+- `login_steps.py` – Authentication and login step implementations
 
 ### How to Run Cucumber Tests
 
 #### Prerequisites
 
-Install Behave framework:
+Install dependencies:
 
 ```powershell
 cd Workshop4/cucumber
-python -m pip install -r requirements.txt
+pip install -r requirements.txt
 ```
 
 #### Run All Features
 
 ```powershell
 cd Workshop4/cucumber
-behave -f pretty -o results/cucumber_run.txt
+python -m behave -f plain
 ```
 
 #### Run a Specific Feature
 
 ```powershell
-behave features/login.feature -f pretty
-```
-
-#### Run with More Details
-
-```powershell
-behave -f plain -i "scenario name"
+behave features/login.feature -f plain
 ```
 
 ### Test Results
 
-Results are saved to:
-- **Text output:** `Workshop4/cucumber/results/cucumber_run.txt`
-- **JSON output:** `Workshop4/cucumber/results/cucumber_run.json`
-- **JUnit XML:** `Workshop4/cucumber/results/cucumber_junit.xml`
+Results are saved to: `Workshop4/cucumber/results/`
 
-**Example output (from last run):**
+**Example output:**
 ```
-Feature: User Login
+Feature: User login
+  Scenario: Successful login
+    Given a user with email "john.doe@example.com" and password "Jd@2025!Secure" ... passed
+    When the user submits valid credentials to "/api/auth/login" ... passed
+    Then the response status should be 200 ... passed
 
-  Scenario: Successful login with valid credentials
-    Given the auth service is running on port 8080
-    When I POST to /api/auth/login with email "admin@bookwise.com" and password "Secure123!"
-    Then the response status code should be 200
-    And the response contains a JWT token
-
-2 scenarios passed, 0 failed in 0.235s
+11 scenarios passed, 0 failed
 ```
 
 ---
@@ -149,63 +134,42 @@ Feature: User Login
 Located in: `Workshop4/jmeter/`
 
 **Files:**
-- `testplan.jmx` – Original login-only test plan
-- `testplan_all.jmx` – Comprehensive plan covering all endpoints
+- `testplan_all.jmx` – Comprehensive test plan covering main endpoints
 
-### Test Coverage (testplan_all.jmx)
+### Test Coverage
 
-The comprehensive test plan includes:
+The test plan includes:
 
-| Endpoint | Method | Purpose | Auth Required |
-|----------|--------|---------|----------------|
-| `/health` | GET | Python backend health check | No |
-| `/books` | GET | List all books | No |
-| `/books/available` | GET | List available books | No |
-| `/categories` | GET | List categories | No |
-| `/categories` | POST | Create new category | Yes |
-| `/books` | POST | Add new book | Yes |
-| `/users` | GET | List users | Yes (Admin) |
-| `/loans` | GET | List loans | Yes (Admin) |
-| `/loans/active` | GET | List active loans | No |
-| `/auth/register` | POST | Register new user | No |
-| `/auth/login` | POST | User login | No |
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/health` | GET | Backend health check |
+| `/api/books` | GET | List all books |
+| `/api/books/{id}` | GET | Get book details |
+| `/api/categories` | GET | List categories |
+| `/api/auth/register` | POST | Register new user |
+| `/api/auth/login` | POST | User login |
+| `/api/borrow` | POST | Borrow a book |
+| `/api/return` | POST | Return a book |
 
 ### How to Run JMeter
 
-#### Option 1: GUI Mode (Recommended for Testing)
+#### Option 1: GUI Mode
 
 ```powershell
 # Windows example (adjust path to your JMeter installation)
 "C:\apache-jmeter\bin\jmeter.bat" -t "Workshop4\jmeter\testplan_all.jmx"
-
-# Or use Docker JMeter image
-docker run --rm --network host -v "$(pwd)\Workshop4\jmeter:/testplans" justb4/jmeter:latest -t /testplans/testplan_all.jmx -g /testplans/results/html-report-all
 ```
 
 #### Option 2: Non-GUI Mode (Batch Execution)
 
 ```powershell
-# Clean previous results
-Remove-Item -Force -Recurse Workshop4\jmeter\results\*
+cd Workshop4/jmeter
 
 # Run test plan
-"C:\apache-jmeter\bin\jmeter.bat" -n -t "Workshop4\jmeter\testplan_all.jmx" -l "Workshop4\jmeter\results\result_all.jtl" -e -o "Workshop4\jmeter\results\html-report-all"
+"C:\apache-jmeter\bin\jmeter.bat" -n -t "testplan_all.jmx" -l "results\result_all.jtl" -e -o "results\html-report-all"
 
-# View results
-Start-Process "Workshop4\jmeter\results\html-report-all\index.html"
-```
-
-#### Option 3: Using Docker (Recommended)
-
-```powershell
-# Set working directory
-cd Workshop4
-
-# Remove old results
-Remove-Item -Force -Recurse jmeter\results\result_all.jtl, jmeter\results\html-report-all
-
-# Run JMeter in container (targets host services via host.docker.internal)
-docker run --rm --mount type=bind,source="$PWD\jmeter",target=/testplans --mount type=bind,source="$PWD\jmeter\results",target=/results justb4/jmeter:latest -n -t /testplans/testplan_all.jmx -l /results/result_all.jtl -e -o /results/html-report-all
+# View results in browser
+Start-Process "results\html-report-all\index.html"
 ```
 
 ### Test Results
@@ -219,35 +183,21 @@ Results are stored in: `Workshop4/jmeter/results/`
 
 **Example Result Summary:**
 ```
-50 samples, 20 successful (40% success rate)
-Avg: 42ms
-Min: 12ms
-Max: 215ms
+Total Requests: 90
+Successful: 60 (66.67% success rate)
+Failed: 30 (protected endpoints without auth)
+Average Response Time: 45 ms
 ```
-
-**To view HTML report:**
-```powershell
-Start-Process "Workshop4\jmeter\results\html-report-all\index.html"
-```
-
-### Performance Analysis
-
-Expected metrics (from last run):
-- **Total Requests:** 50
-- **Successful:** 20 (40%)
-- **Failed:** 30 (60%)
-- **Average Response Time:** 42 ms
-- **95th Percentile:** 120 ms
-
-**Note:** Failures are primarily due to authentication requirements. Protected endpoints require valid JWT tokens. To achieve 100% success, implement token extraction and propagation in the JMeter test plan (add login sampler + token extraction + HTTP Header Manager).
 
 ---
 
 ## ⚙️ 4. GitHub Actions CI/CD Pipeline
 
-### Workflow Configuration
+### Workflow Files
 
-**File:** `.github/workflows/ci.yml`
+Located in `.github/workflows/`:
+- `build.yml` – Main CI/CD workflow
+- Other workflow files for specific triggers
 
 ### What the Pipeline Does
 
@@ -255,130 +205,39 @@ On **push to `main`** or **pull request**, the workflow:
 
 1. ✅ **Checks out code** from the repository
 2. ✅ **Sets up Python 3.11** (for backend tests)
-3. ✅ **Installs Python dependencies** (`requirements.txt`, `requirements-test.txt`)
-4. ✅ **Runs pytest** on the Python backend (`Code/Backend`)
-5. ✅ **Sets up Java 17** (for Spring Boot builds)
-6. ✅ **Builds Java project** with Maven (`mvn -B -DskipTests package`)
-7. ✅ **Builds Docker images** for all three components:
-   - `bookwise_api:ci` (Python backend)
-   - `bookwise_auth:ci` (Java backend)
-   - `bookwise_frontend:ci` (Frontend)
-
-### Workflow File Content
-
-```yaml
-name: CI
-
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
-
-jobs:
-  test-and-build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Java 17
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
-
-      - name: Install Python test deps
-        working-directory: Code/Backend
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements-test.txt || true
-
-      - name: Run Python tests (pytest)
-        working-directory: Code/Backend
-        run: |
-          pytest -q || true
-
-      - name: Build Java project (package)
-        working-directory: Code/BackendAuthentication
-        run: mvn -B -DskipTests package
-
-      - name: Build Docker images
-        run: |
-          docker build -t bookwise_api:ci Code/Backend
-          docker build -t bookwise_auth:ci Code/BackendAuthentication
-          docker build -t bookwise_frontend:ci Code/Frontend
-```
-
-### View Pipeline Results
-
-1. Go to GitHub repo → **Actions** tab
-2. Click on the latest workflow run
-3. Expand each job to see logs and results
-
-### Example Execution Evidence
-
-```
-✅ Checkout repository
-✅ Set up Java 17 (OpenJDK 17.0.2)
-✅ Set up Python 3.11
-✅ Install Python dependencies (25 packages)
-✅ Run Python tests (pytest)
-   - 45 tests passed in 2.34s
-   - Coverage: 78%
-✅ Build Java project
-   - Maven build successful
-   - JAR created: target/auth-service-1.0-SNAPSHOT.jar
-✅ Build Docker images
-   - bookwise_api:ci ........... 1.2 GB (12 layers)
-   - bookwise_auth:ci .......... 856 MB (8 layers)
-   - bookwise_frontend:ci ...... 345 MB (6 layers)
-
-Workflow completed in 5m 42s ✓
-```
+3. ✅ **Sets up Java 17** (for Spring Boot builds)
+4. ✅ **Builds Docker images** for all components
+5. ✅ **Runs tests** where applicable
 
 ---
 
-## 📁 5. Directory Structure
+## 📁 Directory Structure
 
 ```
-BookWiseUD/
-├── .github/
-│   └── workflows/
-│       └── ci.yml                          ← GitHub Actions CI workflow
-├── Code/
-│   ├── Backend/                            ← Python FastAPI backend
-│   │   ├── Dockerfile                      ← Python service image definition
-│   │   ├── app/
-│   │   ├── requirements.txt
-│   │   └── wait_for_db.py
-│   ├── BackendAuthentication/              ← Java Spring Boot backend
-│   │   ├── Dockerfile                      ← Java service image definition
-│   │   ├── pom.xml
-│   │   └── src/
-│   └── Frontend/                           ← React/Vite frontend
-│       ├── Dockerfile                      ← Frontend image definition
-│       ├── package.json
-│       └── src/
-├── Workshop4/                              ← All deliverables for this workshop
-│   ├── README.md                           ← THIS FILE
-│   ├── docker-compose.yml                  ← Service orchestration
-│   ├── cucumber/
-│   │   ├── features/                       ← Cucumber .feature files
-│   │   ├── features/steps/                 ← Step implementations (Python)
-│   │   ├── requirements.txt                ← Behave dependencies
-│   │   └── results/                        ← Test execution results
-│   ├── jmeter/
-│   │   ├── testplan.jmx                    ← Original test plan
-│   │   ├── testplan_all.jmx                ← Comprehensive test plan
-│   │   └── results/                        ← JMeter results (JTL, CSV, HTML)
-│   └── docker/                             ← Alternative Dockerfile copies (optional)
-└── docker-compose.yml                      ← Root-level orchestration
+Workshop4/
+├── README.md                           ← THIS FILE
+├── docker-compose.yml                  ← Service orchestration
+├── docker/
+│   ├── DockerFile-frontend             ← Frontend image definition
+│   ├── DockerFile-java                 ← Java service image definition
+│   └── DockerFile-python               ← Python service image definition
+├── cucumber/
+│   ├── features/                       ← Cucumber .feature files
+│   │   ├── login.feature
+│   │   ├── register.feature
+│   │   ├── books.feature
+│   │   ├── book_management.feature
+│   │   └── borrow_return.feature
+│   ├── features/steps/                 ← Step implementations
+│   │   ├── http_steps.py
+│   │   └── login_steps.py
+│   ├── requirements.txt                ← Behave dependencies
+│   └── results/                        ← Test execution results
+├── jmeter/
+│   ├── testplan_all.jmx                ← Comprehensive test plan
+│   ├── README.md                       ← JMeter documentation
+│   └── results/                        ← JMeter results (JTL, CSV, HTML)
+└── dumps/                              ← Database backup files
 ```
 
 ---
@@ -391,34 +250,20 @@ BookWiseUD/
 # 1. Start all services
 docker-compose up -d --build
 
-# 2. Wait ~30 seconds for services to initialize
+# 2. Wait for services to initialize
+Start-Sleep -Seconds 30
 
-# 3. Verify services
-curl http://localhost:8000/health      # Python API
-curl http://localhost:8080             # Java backend
-curl http://localhost:5173             # Frontend
-
-# 4. Create a test user (in PostgreSQL)
-docker exec -i bookwiseud-db-1 psql -U bookwise -d bookwise -c "
-  INSERT INTO app_user (auth_id, full_name, email, phone, status) 
-  VALUES (1, 'John Doe', 'john.doe@example.com', NULL, 'active');
-"
-
-# 5. Run Cucumber tests
+# 3. Run Cucumber tests
 cd Workshop4/cucumber
-behave -f pretty
+python -m behave -f plain
 
-# 6. Run JMeter stress tests
-cd ../jmeter
-docker run --rm --network host -v "$(pwd):/testplans" justb4/jmeter:latest -n -t /testplans/testplan_all.jmx -l /testplans/results/result_all.jtl -e -o /testplans/results/html-report-all
-
-# 7. View JMeter results
-Start-Process "Workshop4\jmeter\results\html-report-all\index.html"
+# 4. Run JMeter stress tests (using GUI)
+# Open JMeter and load testplan_all.jmx from Workshop4/jmeter/
 ```
 
 ### For CI/CD Pipeline (GitHub Actions)
 
-Simply push or create a PR to `main`:
+Simply push to `main`:
 
 ```powershell
 git add .
@@ -426,37 +271,26 @@ git commit -m "Add feature"
 git push origin main
 ```
 
-The workflow will automatically:
-- Run Python tests
-- Build Java package
-- Build all Docker images
-- Report status (success/failure)
+The workflow will automatically build and test.
 
 ---
 
 ## 📊 Test Evidence & Results
 
-### Cucumber Execution Log
+### Cucumber Results
 
-**File:** `Workshop4/cucumber/results/cucumber_run.txt`
+Located in: `Workshop4/cucumber/results/`
 
-Shows all feature scenarios, steps passed/failed.
+Shows all feature scenarios and pass/fail status.
 
 ### JMeter HTML Report
 
-**File:** `Workshop4/jmeter/results/html-report-all/index.html`
+Located in: `Workshop4/jmeter/results/html-report-all/index.html`
 
 Interactive dashboard showing:
 - Response time graphs
-- Error rates per endpoint
 - Throughput analysis
-- Percentile distributions
-
-### GitHub Actions Logs
-
-**Location:** GitHub repo → Actions tab → [Latest Run] → [Job Name]
-
-Shows Python tests, Maven build output, Docker build progress.
+- Request/response details
 
 ---
 
@@ -474,61 +308,376 @@ docker-compose down -v
 docker-compose up --build
 ```
 
-### Database Connection Issues
+### Cucumber Tests Failing
 
 ```powershell
-# Verify database container is healthy
+# Verify services are running
 docker-compose ps
 
-# Check database logs
-docker-compose logs db
-docker-compose logs mysql
+# Run with verbose output
+cd Workshop4/cucumber
+python -m behave --no-capture -f plain
+```
 
-# Manually verify connection
-docker exec -i bookwiseud-db-1 psql -U bookwise -c "SELECT 1"
-docker exec -i bookwiseud-mysql-1 mysqladmin ping -uroot -p2828
+### JMeter Connection Issues
+
+Ensure services are running and accessible on localhost:8000 and localhost:8080.
+
+---
+
+## ✅ Deliverables
+
+- [x] **Dockerfiles** – All three components
+- [x] **docker-compose.yml** – Service orchestration
+- [x] **Cucumber Features** – 5 feature files
+- [x] **Cucumber Steps** – HTTP and login implementations
+- [x] **JMeter Test Plan** – Comprehensive endpoint coverage
+- [x] **JMeter Results** – HTML reports with analysis
+- [x] **GitHub Actions** – CI/CD workflow
+- [x] **Documentation** – This README with full instructions
+
+---
+
+**Last Updated:** November 29, 2025
+**Status:** ✅ All deliverables complete and tested
+## 📋 Overview
+
+Workshop 4 contains all deliverables for deployment, acceptance testing (Cucumber/Behave), and stress testing (JMeter) of the BookWise application. This includes:
+
+- ✅ **Dockerfiles** for all three components (Java Backend, Python Backend, Frontend)
+- ✅ **docker-compose.yml** to orchestrate all services
+- ✅ **Cucumber features & step definitions** for acceptance testing (Behave framework)
+- ✅ **JMeter test plans** (JMX) with stress testing results
+- ✅ **GitHub Actions CI/CD workflow** for automated builds and testing
+
+---
+
+>>>>>>> 2f18da2 (fix: correct Workshop4 README and update Behave step definitions with correct API base URL)
+## 🐳 1. Docker & docker-compose
+
+### Dockerfiles Location
+
+All Dockerfiles are located in the `docker/` directory:
+
+| Component | Dockerfile | Language | Port |
+|-----------|-----------|----------|------|
+| **Backend Java (Spring Boot)** | `docker/DockerFile-java` | Java 17 | 8080 |
+| **Backend Python (FastAPI)** | `docker/DockerFile-python` | Python 3.11 | 8000 |
+| **Frontend (Vite + React)** | `docker/DockerFile-frontend` | Node 18 | 5173 |
+
+### Docker Compose Configuration
+
+**File:** `docker-compose.yml` (root level of BookWiseUD)
+
+**Services:**
+- `db` – PostgreSQL 15 (BookWise catalog database)
+- `mysql` – MySQL 8.0 (Authentication/Security database)
+- `python-backend` – FastAPI service (port 8000)
+- `java-backend` – Spring Boot auth service (port 8080)
+- `frontend` – React Vite application (port 5173)
+
+### How to Run All Services Locally
+
+From the repository **root** directory:
+
+```powershell
+# Start all services with build
+docker-compose up --build
+
+# Or just start if images are already built
+docker-compose up -d
+
+# Wait for all services to be ready
+Start-Sleep -Seconds 30
+```
+
+**Verify Services Are Running:**
+
+```powershell
+docker compose ps
+```
+
+### Stop Services
+
+```powershell
+docker-compose down
+
+# Remove volumes (clean database)
+docker-compose down -v
+```
+
+---
+
+## 🥒 2. Cucumber Acceptance Testing (Behave)
+
+### Features Location
+
+All feature files are in: `Workshop4/cucumber/features/`
+
+**Available features:**
+- `login.feature` – User login scenarios
+- `register.feature` – User registration scenarios
+- `books.feature` – Book listing and details
+- `book_management.feature` – Adding/updating/deleting books
+- `borrow_return.feature` – Borrowing and returning books
+
+### Step Definitions
+
+Located in: `Workshop4/cucumber/features/steps/`
+
+**Key files:**
+- `http_steps.py` – Generic HTTP request steps (GET, POST, PUT, DELETE)
+- `login_steps.py` – Authentication and login step implementations
+
+### How to Run Cucumber Tests
+
+#### Prerequisites
+
+Install dependencies:
+
+```powershell
+cd Workshop4/cucumber
+pip install -r requirements.txt
+```
+
+#### Run All Features
+
+```powershell
+cd Workshop4/cucumber
+python -m behave -f plain
+```
+
+#### Run a Specific Feature
+
+```powershell
+behave features/login.feature -f plain
+```
+
+### Test Results
+
+Results are saved to: `Workshop4/cucumber/results/`
+
+**Example output:**
+```
+Feature: User login
+  Scenario: Successful login
+    Given a user with email "john.doe@example.com" and password "Jd@2025!Secure" ... passed
+    When the user submits valid credentials to "/api/auth/login" ... passed
+    Then the response status should be 200 ... passed
+
+11 scenarios passed, 0 failed
+```
+
+---
+
+## 🔥 3. JMeter Stress Testing
+
+### Test Plans
+
+Located in: `Workshop4/jmeter/`
+
+**Files:**
+- `testplan_all.jmx` – Comprehensive test plan covering main endpoints
+
+### Test Coverage
+
+The test plan includes:
+
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/health` | GET | Backend health check |
+| `/api/books` | GET | List all books |
+| `/api/books/{id}` | GET | Get book details |
+| `/api/categories` | GET | List categories |
+| `/api/auth/register` | POST | Register new user |
+| `/api/auth/login` | POST | User login |
+| `/api/borrow` | POST | Borrow a book |
+| `/api/return` | POST | Return a book |
+
+### How to Run JMeter
+
+#### Option 1: GUI Mode
+
+```powershell
+# Windows example (adjust path to your JMeter installation)
+"C:\apache-jmeter\bin\jmeter.bat" -t "Workshop4\jmeter\testplan_all.jmx"
+```
+
+#### Option 2: Non-GUI Mode (Batch Execution)
+
+```powershell
+cd Workshop4/jmeter
+
+# Run test plan
+"C:\apache-jmeter\bin\jmeter.bat" -n -t "testplan_all.jmx" -l "results\result_all.jtl" -e -o "results\html-report-all"
+
+# View results in browser
+Start-Process "results\html-report-all\index.html"
+```
+
+### Test Results
+
+Results are stored in: `Workshop4/jmeter/results/`
+
+**Files:**
+- `result_all.jtl` – Raw JMeter results (XML format)
+- `html-report-all/index.html` – **HTML dashboard** (open in browser)
+- `jmeter_results.csv` – CSV summary
+
+**Example Result Summary:**
+```
+Total Requests: 90
+Successful: 60 (66.67% success rate)
+Failed: 30 (protected endpoints without auth)
+Average Response Time: 45 ms
+```
+
+---
+
+## ⚙️ 4. GitHub Actions CI/CD Pipeline
+
+### Workflow Files
+
+Located in `.github/workflows/`:
+- `build.yml` – Main CI/CD workflow
+- Other workflow files for specific triggers
+
+### What the Pipeline Does
+
+On **push to `main`** or **pull request**, the workflow:
+
+1. ✅ **Checks out code** from the repository
+2. ✅ **Sets up Python 3.11** (for backend tests)
+3. ✅ **Sets up Java 17** (for Spring Boot builds)
+4. ✅ **Builds Docker images** for all components
+5. ✅ **Runs tests** where applicable
+
+---
+
+## 📁 Directory Structure
+
+```
+Workshop4/
+├── README.md                           ← THIS FILE
+├── docker-compose.yml                  ← Service orchestration
+├── docker/
+│   ├── DockerFile-frontend             ← Frontend image definition
+│   ├── DockerFile-java                 ← Java service image definition
+│   └── DockerFile-python               ← Python service image definition
+├── cucumber/
+│   ├── features/                       ← Cucumber .feature files
+│   │   ├── login.feature
+│   │   ├── register.feature
+│   │   ├── books.feature
+│   │   ├── book_management.feature
+│   │   └── borrow_return.feature
+│   ├── features/steps/                 ← Step implementations
+│   │   ├── http_steps.py
+│   │   └── login_steps.py
+│   ├── requirements.txt                ← Behave dependencies
+│   └── results/                        ← Test execution results
+├── jmeter/
+│   ├── testplan_all.jmx                ← Comprehensive test plan
+│   ├── README.md                       ← JMeter documentation
+│   └── results/                        ← JMeter results (JTL, CSV, HTML)
+└── dumps/                              ← Database backup files
+```
+
+---
+
+## 🚀 Quick Start Guide
+
+### For Local Development
+
+```powershell
+# 1. Start all services
+docker-compose up -d --build
+
+# 2. Wait for services to initialize
+Start-Sleep -Seconds 30
+
+# 3. Run Cucumber tests
+cd Workshop4/cucumber
+python -m behave -f plain
+
+# 4. Run JMeter stress tests (using GUI)
+# Open JMeter and load testplan_all.jmx from Workshop4/jmeter/
+```
+
+### For CI/CD Pipeline (GitHub Actions)
+
+Simply push to `main`:
+
+```powershell
+git add .
+git commit -m "Add feature"
+git push origin main
+```
+
+The workflow will automatically build and test.
+
+---
+
+## 📊 Test Evidence & Results
+
+### Cucumber Results
+
+Located in: `Workshop4/cucumber/results/`
+
+Shows all feature scenarios and pass/fail status.
+
+### JMeter HTML Report
+
+Located in: `Workshop4/jmeter/results/html-report-all/index.html`
+
+Interactive dashboard showing:
+- Response time graphs
+- Throughput analysis
+- Request/response details
+
+---
+
+## 🔧 Troubleshooting
+
+### Services Not Starting
+
+```powershell
+# Check logs
+docker-compose logs python-backend
+docker-compose logs java-backend
+
+# Rebuild from scratch
+docker-compose down -v
+docker-compose up --build
 ```
 
 ### Cucumber Tests Failing
 
 ```powershell
-# Check if services are running
-curl http://localhost:8000/health
-curl http://localhost:8080
+# Verify services are running
+docker-compose ps
 
 # Run with verbose output
 cd Workshop4/cucumber
-behave --no-capture -f plain
+python -m behave --no-capture -f plain
 ```
 
-### JMeter Connection Refused
+### JMeter Connection Issues
 
-Ensure services are accessible. If running JMeter in Docker, use:
-- `host.docker.internal` (Windows/Mac)
-- `172.17.0.1` (Linux with default bridge)
+Ensure services are running and accessible on localhost:8000 and localhost:8080.
 
 ---
 
-## ✅ Deliverables Checklist
+## ✅ Deliverables
 
-- [x] **Dockerfiles** – All three components have production-ready Dockerfiles
-- [x] **docker-compose.yml** – Orchestrates PostgreSQL, MySQL, Python API, Java auth, Frontend
-- [x] **Cucumber Features** – 5 feature files covering main user journeys
-- [x] **Cucumber Steps** – HTTP steps, auth steps, common utilities
-- [x] **JMeter Plans** – Basic plan (login) + comprehensive plan (all endpoints)
-- [x] **JMeter Results** – HTML report, JTL, CSV outputs stored locally
-- [x] **GitHub Actions** – CI workflow runs tests, builds, Docker image creation
-- [x] **This README** – Complete instructions for all components
-
----
-
-## 📚 References
-
-- **Docker Documentation:** https://docs.docker.com/
-- **Docker Compose:** https://docs.docker.com/compose/
-- **Behave (Cucumber for Python):** https://behave.readthedocs.io/
-- **Apache JMeter:** https://jmeter.apache.org/
-- **GitHub Actions:** https://docs.github.com/en/actions
+- [x] **Dockerfiles** – All three components
+- [x] **docker-compose.yml** – Service orchestration
+- [x] **Cucumber Features** – 5 feature files
+- [x] **Cucumber Steps** – HTTP and login implementations
+- [x] **JMeter Test Plan** – Comprehensive endpoint coverage
+- [x] **JMeter Results** – HTML reports with analysis
+- [x] **GitHub Actions** – CI/CD workflow
+- [x] **Documentation** – This README with full instructions
 
 ---
 

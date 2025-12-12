@@ -56,7 +56,7 @@ def update_user(db: Session, user_id: int, user_update: schemas.UserCreate):
             raise ValueError("Email already registered by another user")
     
     # Actualizar campos
-    for key, value in user_update.dict(exclude_unset=True).items():
+    for key, value in user_update.model_dump(exclude_unset=True).items():
         setattr(user, key, value)
     
     db.commit()

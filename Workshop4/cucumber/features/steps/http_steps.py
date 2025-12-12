@@ -2,7 +2,7 @@ import json
 import requests
 from behave import given, when, then
 
-BASE_URL = 'http://localhost:8000'
+BASE_URL = 'http://localhost:8000/api'
 
 
 def _headers(context):

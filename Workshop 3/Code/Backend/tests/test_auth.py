@@ -2,7 +2,7 @@
 import pytest
 import jwt
 import base64
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from fastapi import HTTPException
 from app.auth_utils import decode_jwt, get_current_user, get_current_librarian
 
@@ -20,7 +20,7 @@ class TestJWTDecoding:
             "id": 1,
             "username": "test@example.com",
             "rol": "USER",
-            "exp": datetime.utcnow() + timedelta(hours=1)
+            "exp": datetime.now(timezone.utc) + timedelta(hours=1)
         }
         token = jwt.encode(payload, DECODED_KEY, algorithm=ALGORITHM)
         
@@ -34,7 +34,7 @@ class TestJWTDecoding:
             "id": 1,
             "username": "test@example.com",
             "rol": "USER",
-            "exp": datetime.utcnow() - timedelta(hours=1)
+            "exp": datetime.now(timezone.utc) - timedelta(hours=1)
         }
         token = jwt.encode(payload, DECODED_KEY, algorithm=ALGORITHM)
         
@@ -97,7 +97,7 @@ class TestGetCurrentUser:
         payload = {
             "id": 1,
             "rol": "USER",
-            "exp": datetime.utcnow() + timedelta(hours=1)
+            "exp": datetime.now(timezone.utc) + timedelta(hours=1)
         }
         token = jwt.encode(payload, DECODED_KEY, algorithm=ALGORITHM)
         credentials = HTTPAuthorizationCredentials(

@@ -1,5 +1,5 @@
 # app/schemas.py
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import Optional
 from datetime import date
 
@@ -12,8 +12,7 @@ class CategoryCreate(CategoryBase):
 
 class Category(CategoryBase):
     category_id: int
-    class Config:
-        from_attributes = True  # ✅ Cambiado de orm_mode
+    model_config = ConfigDict(from_attributes=True)
 
 
 class BookBase(BaseModel):
@@ -29,8 +28,7 @@ class BookCreate(BookBase):
 
 class Book(BookBase):
     book_id: int
-    class Config:
-        from_attributes = True  # ✅ Cambiado de orm_mode
+    model_config = ConfigDict(from_attributes=True)
 
 
 class UserBase(BaseModel):
@@ -45,8 +43,7 @@ class UserCreate(UserBase):
 
 class User(UserBase):
     user_id: int
-    class Config:
-        from_attributes = True  # ✅ Cambiado de orm_mode
+    model_config = ConfigDict(from_attributes=True)
 
 
 class LoanBase(BaseModel):
@@ -64,5 +61,4 @@ class LoanCreate(BaseModel):
 class Loan(LoanBase):
     loan_id: int
     user_id: int  
-    class Config:
-        from_attributes = True  # ✅ Cambiado de orm_mode
+    model_config = ConfigDict(from_attributes=True)

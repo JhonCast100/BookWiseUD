@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.user import User  # ✅ Importación explícita
 
-security = HTTPBearer()
+security = HTTPBearer(auto_error=False)
 
 SECRET_KEY = "MTkxNTYyMDIzMTE4NTUxNDc5MTQ1NTE4OTE0NzE5NTEzOTE0MTE4"
 ALGORITHM = "HS256"
@@ -32,6 +32,8 @@ def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security),
     db: Session = Depends(get_db)
 ) -> User:
+    if credentials is None:
+        raise HTTPException(status_code=401, detail="No token provided")
 
     token = credentials.credentials
     payload = decode_jwt(token)
@@ -64,6 +66,8 @@ def get_current_librarian(
     credentials: HTTPAuthorizationCredentials = Depends(security),
     db: Session = Depends(get_db)
 ) -> User:
+    if credentials is None:
+        raise HTTPException(status_code=401, detail="No token provided")
 
     token = credentials.credentials
     payload = decode_jwt(token)

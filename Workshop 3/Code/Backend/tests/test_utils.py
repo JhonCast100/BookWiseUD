@@ -1,7 +1,7 @@
 # tests/test_utils.py
 import pytest
 import jwt
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from fastapi import HTTPException
 from app import auth_utils
 import base64
@@ -17,7 +17,7 @@ def test_decode_jwt_valid():
         "username": "test@example.com",
         "id": 1,
         "rol": "USER",
-        "exp": datetime.utcnow() + timedelta(hours=1)
+        "exp": datetime.now(timezone.utc) + timedelta(hours=1)
     }
     token = jwt.encode(payload, DECODED_KEY, algorithm=ALGORITHM)
     
@@ -31,7 +31,7 @@ def test_decode_jwt_expired():
         "username": "test@example.com",
         "id": 1,
         "rol": "USER",
-        "exp": datetime.utcnow() - timedelta(hours=1)  # Token expirado
+        "exp": datetime.now(timezone.utc) - timedelta(hours=1)  # Token expirado
     }
     token = jwt.encode(payload, DECODED_KEY, algorithm=ALGORITHM)
     
@@ -56,7 +56,7 @@ def test_get_current_user_existing(db_session, sample_user):
         "username": sample_user.email,
         "id": sample_user.auth_id,
         "rol": "USER",
-        "exp": datetime.utcnow() + timedelta(hours=1)
+        "exp": datetime.now(timezone.utc) + timedelta(hours=1)
     }
     token = jwt.encode(payload, DECODED_KEY, algorithm=ALGORITHM)
     
@@ -76,7 +76,7 @@ def test_get_current_user_auto_create(db_session):
         "username": "newuser@example.com",
         "id": 999,
         "rol": "USER",
-        "exp": datetime.utcnow() + timedelta(hours=1)
+        "exp": datetime.now(timezone.utc) + timedelta(hours=1)
     }
     token = jwt.encode(payload, DECODED_KEY, algorithm=ALGORITHM)
     
@@ -96,7 +96,7 @@ def test_get_current_librarian_admin(db_session, admin_user):
         "username": admin_user.email,
         "id": admin_user.auth_id,
         "rol": "ADMIN",
-        "exp": datetime.utcnow() + timedelta(hours=1)
+        "exp": datetime.now(timezone.utc) + timedelta(hours=1)
     }
     token = jwt.encode(payload, DECODED_KEY, algorithm=ALGORITHM)
     
@@ -115,7 +115,7 @@ def test_get_current_librarian_forbidden(db_session, sample_user):
         "username": sample_user.email,
         "id": sample_user.auth_id,
         "rol": "USER",
-        "exp": datetime.utcnow() + timedelta(hours=1)
+        "exp": datetime.now(timezone.utc) + timedelta(hours=1)
     }
     token = jwt.encode(payload, DECODED_KEY, algorithm=ALGORITHM)
     
@@ -134,7 +134,7 @@ def test_optional_auth_with_token(db_session, sample_user):
         "username": sample_user.email,
         "id": sample_user.auth_id,
         "rol": "USER",
-        "exp": datetime.utcnow() + timedelta(hours=1)
+        "exp": datetime.now(timezone.utc) + timedelta(hours=1)
     }
     token = jwt.encode(payload, DECODED_KEY, algorithm=ALGORITHM)
     

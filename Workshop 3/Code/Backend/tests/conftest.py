@@ -7,7 +7,7 @@ from app.database import Base, get_db
 from app.main import app
 import jwt
 import base64
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 # Base de datos de prueba en memoria
 SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"
@@ -77,7 +77,7 @@ def create_token():
             "id": user_id,
             "username": username,
             "rol": rol,
-            "exp": datetime.utcnow() + timedelta(hours=1)
+            "exp": datetime.now(timezone.utc) + timedelta(hours=1)
         }
         return jwt.encode(payload, DECODED_KEY, algorithm=ALGORITHM)
     return _create_token
