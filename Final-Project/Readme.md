@@ -4,6 +4,11 @@
 
 BookWise is a comprehensive library management system designed for educational institutions and public libraries. The system facilitates book catalog organization, user management, and lending operations through a modern web interface.
 
+
+## Project Demo Video
+https://youtu.be/_IGcNLX1f6I
+
+
 **Business Domain:** Library Resource Management
 
 **Core Functionality:** Book inventory management, user authentication, borrowing/returning operations, and statistical reporting.
