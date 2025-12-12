@@ -126,8 +126,7 @@ jmeter -n -t testplan_all.jmx -l results/load_test.jtl
 
 ### Java Backend (Spring Boot)
 
-- Health Check: http://localhost:8080/health
-- Actuator Endpoints: http://localhost:8080/actuator
+- Endpoints Check: http://localhost:8080/auth
 
 ## Docker Configuration
 
