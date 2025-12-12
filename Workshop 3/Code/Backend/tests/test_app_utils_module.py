@@ -65,6 +65,36 @@ def test_get_current_user_auto_create():
     assert user.username == "newuser@example.com"
 
 
+def test_get_current_user_missing_username(monkeypatch):
+    # jwt.decode returns payload without username
+    import jwt as _jwt
+    from app import utils as _utils
+
+    def fake_decode(token, key, algorithms):
+        return {"exp": (datetime.now(timezone.utc).timestamp() + 3600)}
+
+    monkeypatch.setattr(_jwt, "decode", fake_decode)
+
+    with pytest.raises(HTTPException) as exc:
+        _utils.get_current_user("token")
+    assert exc.value.status_code == 401
+
+
+def test_optional_auth_with_token():
+    # should return a user when token valid
+    utils._users_db.clear()
+    payload = {
+        "username": "opt@example.com",
+        "id": 77,
+        "rol": "USER",
+        "exp": datetime.now(timezone.utc) + timedelta(hours=1)
+    }
+    token = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+    user = utils.optional_auth(token)
+    assert user is not None
+    assert user.username == "opt@example.com"
+
+
 def test_get_current_librarian_forbidden():
     user = utils.User("someone", role="user")
     with pytest.raises(HTTPException) as exc_info:
